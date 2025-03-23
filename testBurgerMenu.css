@@ -1,0 +1,62 @@
+.navbar {
+    position: relative;
+    padding: 15px;
+}
+
+#burgerToggle {
+    opacity: 0;
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+}
+
+.burger-icon {
+    display: block;
+    position: absolute;
+    top: 15px;
+    left: 0;
+    cursor: pointer;
+}
+
+.burger-icon .bar {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background: #333;
+    margin: 5px 0;
+    transition: 0.4s;
+}
+
+.nav-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 70%;
+    background: #f8f8f8;
+    flex-direction: column;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    padding: 0;
+}
+
+.nav-menu li {
+    padding: 10px;
+    text-align: left;
+    font-weight: 800;
+}
+
+.nav-menu a {
+    text-decoration: none;
+    color: #333;
+}
+
+.nav-menu div {
+    padding-left: 5%;
+}
+
+#burgerToggle:checked~.nav-menu {
+    max-height: 500px;
+    padding: 10px 0;
+}
