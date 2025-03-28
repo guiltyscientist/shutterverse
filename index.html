@@ -1,173 +1,40 @@
 <!DOCTYPE html>
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Shutterverse Studio Booking Website">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="index.css">
-    <title>Shutterverse Photostudio</title>
+    <title>Shutterverse Studio</title>
 </head>
-<main>
-    <div class="scroll-container">
-        <header>
-            <section id="home" class="section">
-                <h1>Welcome to the Shutterverse Studio &#128247</h1>
-                <nav class="menu">
-                    <ul class="nav-links">
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="#studios">Our Studios</a></li>
-                        <li><a href="#booking">Booking</a></li>
-                        <li><a href="#location">Location</a></li>
-                        <li class="dropdown">
-                            <a href="#about">About ▼</a>
-                            <ul class="dropdown-menu">
-                                <li><a href="#about">Team</a></li>
-                                <li><a href="#contact">Contact</a></li>
-                                <li><a href="#impressum">Impressum</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <div class="nav-buttons">
-                        <button type="button">Sign Up</button>
-                        <button type="button">Login</button>
-                    </div>
-                </nav>
-                <div class="home-split">
-                    <div class="split-part"><img src="./studios/IMG_4135.jpg" alt="Studio 1"></div>
-                    <div class="split-part"><img src="./studios/IMG_4137.jpg" alt="Studio 2"></div>
-                    <div class="split-part"><img src="./studios/IMG_4138.jpg" alt="Studio 3"></div>
-                </div>
-            </section>
-        </header>
 
-        <body>
-            <section id="studios" class="section">
-                <h2>Our Studios</h2>
-                <div class="studio-columns">
-                    <div class="studio-card">
-                        <img src="./studios/IMG_4135.jpg" alt="Studio 1 Space">
-                        <div class="studio-description">
-                            <h3>Cyberpunk Studio</h3>
-                            <p>Man it was buggy af</p>
-                        </div>
-                    </div>
-                
-                    <div class="studio-card">
-                        <img src="./studios/IMG_4137.jpg" alt="Studio 2 Space">
-                        <div class="studio-description">
-                            <h3>Japanese Studio</h3>
-                            <p>Ghost of Tsushima is better than AC</p>
-                        </div>
-                    </div>
-                
-                    <div class="studio-card">
-                        <img src="./studios/IMG_4138.jpg" alt="Studio 3 Space">
-                        <div class="studio-description">
-                            <h3>Valentines Studio</h3>
-                            <p>Love is in the air</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            <section id="booking" class="section">
-                <h2>Booking</h2>
-                <form id="bookingReq">
-                    <div>
-                        <label for="day">Day:</label>
-                        <br>
-                        <input type="date" id="date" name="bookingDate">
-                    </div>
-                    <div>
-                        <label for="duration">Duration:</label>
-                        <br>
-                        <select id="duration" name="bookingDuration" multiple size="14">
-                            <option value="08:00-09:00">08:00-09:00</option>
-                            <option value="09:00-10:00">09:00-10:00</option>
-                            <option value="09:00-10:00">10:00-11:00</option>
-                            <option value="09:00-10:00">11:00-12:00</option>
-                            <option value="09:00-10:00">12:00-13:00</option>
-                            <option value="09:00-10:00">13:00-14:00</option>
-                            <option value="09:00-10:00">14:00-15:00</option>
-                            <option value="09:00-10:00">15:00-16:00</option>
-                            <option value="09:00-10:00">16:00-17:00</option>
-                            <option value="09:00-10:00">17:00-18:00</option>
-                            <option value="09:00-10:00">18:00-19:00</option>
-                            <option value="09:00-10:00">19:00-20:00</option>
-                            <option value="09:00-10:00">20:00-21:00</option>
-                            <option value="09:00-10:00">21:00-22:00</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="studio1">Studio 1</label>
-                        <input type="checkbox" id="checkStudio1" name="studio1">
-                    </div>
-                    <div>
-                        <label for="studio2">Studio 2</label>
-                        <input type="checkbox" id="checkStudio2" name="studio2">
-                    </div>
-                    <button type="submit">Book Studio</button>
-                </form>
-            </section>
-            <section id="location" class="section">
-                <h2>Our location</h2>
-                <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d1336.8430445481276!2d16.211018139345992!3d47.92311109280521!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zNDfCsDU1JzIzLjIiTiAxNsKwMTInNDQuMyJF!5e0!3m2!1sde!2sat!4v1741690115987!5m2!1sde!2sat"
-                    width="600" 
-                    height="450" 
-                    style="border:0;" 
-                    allowfullscreen="" 
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade">
-                </iframe>
-            </section>
-            <section id="about" class="section">
-                <h2>About us</h2>
-                <div class="profile-container">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png" alt="Team Photo" class="profile-img">
-                </div>
-                
-                <div class="about-content">
-                    <div class="about-column left">
-                        <h3>Aleks</h3>
-                        <p>IG: <a href="https://www.instagram.com/aleksander.photo">Aleksander.photo</a></p>
-                    </div>
-                
-                    <div class="about-column right">
-                        <h3>Viiktoria</h3>
-                        <p>IG: <a href="https://www.instagram.com/taiga.pictures">Taiga.pictures</a></p>
-                    </div>
-                </div>
-            </section>
-            <section id="contact" class="section">
-                <h2>Contact us</h2>
-                <form id="contact-form">
-                    <div>
-                        <label for="contacter-name">Name:</label>
-                        <br>
-                        <input type="text" id="contacter-name" name="name" required>
-                    </div>
-                    <div>
-                        <label for="email-addr">Email address:</label>
-                        <br>
-                        <input type="text" id="email-addr" name="email" required>
-                    </div>
-                    <div>
-                        <label for="msg">Message</label>
-                        <br>
-                        <textarea id="msg" name="message" rows="4" cols="40" required></textarea>
-                    </div>
-                    <button type="submit">Send message</button>
-                </form>
-            </section>
-            <section id="impressum" class="section">
-                <h2>Impressum</h2>
-                <p>
-                    <p>Shutterverse Studio Booking Website</p>
-                    <p>
-                        <a href="https://www.instagram.com/shutterverse.studio/">&copy Shuttverse Studio</a>
-                    </p>
-                </p>
-            </section>
-        </body>
-    </div>
-</main>
+<body>
+    <header>
+        <a href="#" class="logo-desktop"><img src="./Logo/LOGO_Shutterverse_BIG.png" height="25" alt="Logo"></a>
+        <a href="#" class="logo-mobile"><img src="./Logo/LOGO_Shutterverse_ICON.png" height="38" alt="Logo"></a>
+
+        <input type="checkbox" id="menu-toggle" class="menu-toggle">
+        <label for="menu-toggle" class="hamburger">☰</label>
+
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#">HOME</a></li>
+                <li><a href="#">NEWS</a></li>
+                <li><a href="#">STUDIOS</a></li>
+                <li><a href="#">EVENTS</a></li>
+                <li><a href="#">BOOKING</a></li>
+            </ul>
+
+            <!-- About Us Dropdown -->
+            <ul class="about-us">
+                <li class="dropdown">
+                    <a href="#">ABOUT US <span class="arrow">▼</span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Team</a></li>
+                        <li><a href="#">Location</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </header>
+</body>
