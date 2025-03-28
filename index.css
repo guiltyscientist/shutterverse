@@ -1,3 +1,10 @@
+:root {
+    --darkgrey: #222831;
+    --turquoise: #76ABAE;
+    --whitegrey: #EEEEEE;
+    --lightgrey: #31363F;
+}
+
 body {
     padding: 0;
     margin: 0;
@@ -8,7 +15,7 @@ header {
     align-items: center;
     position: sticky;
     top: 0;
-    background: rgb(255, 118, 118);
+    background: var(--darkgrey);
     padding: 0 2rem;
     z-index: 1000;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -46,7 +53,7 @@ nav {
 
 nav a {
     text-decoration: none;
-    color: #fff;
+    color: var(--whitegrey);
     text-transform: uppercase;
     font-family: Arial, sans-serif;
     font-size: 0.9rem;
@@ -58,7 +65,7 @@ nav a {
 }
 
 nav a:hover {
-    color: #ddd;
+    color: var(--turquoise);
 }
 
 .about-us {
@@ -70,6 +77,7 @@ nav a:hover {
 .dropdown {
     position: relative;
     list-style: none;
+    display: inline-block;
 }
 
 .dropdown a {
@@ -78,7 +86,7 @@ nav a:hover {
     justify-content: center;
     gap: 5px;
     text-decoration: none;
-    color: #fff;
+    color: var(--whitegrey);
     font-size: 0.9rem;
     font-weight: bold;
     text-transform: uppercase;
@@ -103,15 +111,16 @@ nav a:hover {
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
-    background: rgb(255, 80, 80);
+    background: var(--darkgrey);
     list-style: none;
     padding: 0;
     margin: 0;
     display: none;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     border-radius: 0 0 8px 8px;
-    min-width: 150px;
     overflow: hidden;
+    min-width: 6rem;
+    text-align: center;
 }
 
 .dropdown-menu li {
@@ -125,12 +134,12 @@ nav a:hover {
     text-decoration: none;
     color: #fff;
     font-size: 0.9rem;
-    padding: 12px 15px;
+    padding: 12px 12px;
     transition: background 0.3s ease;
 }
 
 .dropdown-menu a:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--lightgrey);
 }
 
 .dropdown:hover .dropdown-menu {
@@ -151,15 +160,84 @@ nav a:hover {
     font-size: 1.5rem;
     background: none;
     border: none;
-    color: white;
+    color: var(--whitegrey);
     cursor: pointer;
 }
 
+@media (min-width: 769px) and (max-width: 1024px) {
+  .dropdown-menu {
+    left: auto;
+    right: 50%;
+    transform: translateX(50%);
+  }
+}
+
+@media (max-width: 768px) {
+  .dropdown-menu {
+    left: 0;
+    transform: none;
+    width: 100%;
+  }
+}
+
+@media (max-width: 1024px) {
+    .logo-desktop img {
+        height: 20px;
+        width: auto;
+    }
+
+    header {
+        flex-direction: row;
+        padding: 0 2rem;
+    }
+
+    .nav-links {
+        gap: 3rem;
+    }
+
+    nav a {
+        padding: 0;
+        font-size: 0.8rem;
+    }
+
+    .about-us a {
+        padding: 8px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 880px) {
+    .logo-desktop img {
+        height: 18px;
+        width: auto;
+    }
+
+    header {
+        flex-direction: row;
+        padding: 0 2rem;
+    }
+
+    .nav-links {
+        gap: 2.5rem;
+    }
+
+    nav a {
+        padding: 0;
+        font-size: 0.8rem;
+    }
+
+    .about-us a {
+        padding: 8px;
+        font-size: 0.8rem;
+    }
+}
 
 @media (max-width: 768px) {
     header {
         flex-direction: row;
         padding: 1rem;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .logo-desktop {
@@ -178,7 +256,7 @@ nav a:hover {
         position: absolute;
         top: 60px;
         left: 0;
-        background: rgb(255, 80, 80);
+        background: var(--darkgrey);
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
@@ -195,7 +273,6 @@ nav a:hover {
 
     .nav-links li {
         padding: 10px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     .about-us {
@@ -216,7 +293,7 @@ nav a:hover {
     .hamburger {
         display: block;
         font-size: 2rem;
-        color: white;
+        color: var(--whitegrey);
         cursor: pointer;
         margin-left: auto;
     }
