@@ -3,7 +3,7 @@ import Header from './components/Header.vue';
 import Welcome from './components/Welcome.vue';
 import News from './components/News.vue'
 import SectionDivider from './components/SectionDivider.vue';
-import StudioComponent from './components/StudioComponent.vue';
+import Studios from './components/Studios.vue';
 </script>
 
 <template>
@@ -11,7 +11,7 @@ import StudioComponent from './components/StudioComponent.vue';
   <Welcome />
   <News />
   <SectionDivider />
-  <StudioComponent />
+  <Studios />
 </template>
 
 <style scoped>

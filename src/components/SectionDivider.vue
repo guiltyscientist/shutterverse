@@ -1,4 +1,3 @@
-<!-- SectionDivider.vue -->
 <template>
   <div class="section-divider" :style="dividerStyle"></div>
 </template>

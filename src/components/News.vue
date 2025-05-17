@@ -1,4 +1,3 @@
-<!-- NewsComponent.vue -->
 <template>
   <section id="news" class="news-section">
     <h2 class="section-heading">NEWS</h2>
@@ -27,92 +26,7 @@ export default {
     return {
       visibleItems: 5,
       batchSize: 5,
-      newsData: [
-        {
-            day: "27",
-            month: "APRIL",
-            title: "New Studio – <strong>EASTER</strong> theme starts on the 27th of April",
-            text: "Prepare yourself with a fitting Cosplay and book your slots"
-        },
-        {
-            day: "03",
-            month: "MARCH",
-            title: "New Studio – <strong>RETRO</strong> theme starts on the 3rd of March",
-            text: "Prepare yourself with a fitting Cosplay and book your slots"
-        },
-        {
-            day: "12",
-            month: "MARCH",
-            title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-            text: "Prepare yourself with a fitting Cosplay and book your slots"
-        },
-        {
-            day: "12",
-            month: "MARCH",
-            title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-            text: "Prepare yourself with a fitting Cosplay and book your slots"
-        },
-        {
-            day: "12",
-            month: "MARCH",
-            title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-            text: "Prepare yourself with a fitting Cosplay and book your slots"
-        },
-        {
-            day: "12",
-            month: "MARCH",
-            title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-            text: "Prepare yourself with a fitting Cosplay and book your slots"
-        },
-        {
-            day: "12",
-            month: "MARCH",
-            title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-            text: "Prepare yourself with a fitting Cosplay and book your slots"
-        },
-        {
-            day: "12",
-            month: "MARCH",
-            title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-            text: "Prepare yourself with a fitting Cosplay and book your slots"
-        },
-        {
-            day: "12",
-            month: "MARCH",
-            title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-            text: "Prepare yourself with a fitting Cosplay and book your slots"
-        },
-        {
-            day: "12",
-            month: "MARCH",
-            title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-            text: "Prepare yourself with a fitting Cosplay and book your slots"
-        },
-        {
-            day: "12",
-            month: "MARCH",
-            title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-            text: "Prepare yourself with a fitting Cosplay and book your slots"
-        },
-        {
-            day: "12",
-            month: "MARCH",
-            title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-            text: "Prepare yourself with a fitting Cosplay and book your slots"
-        },
-        {
-            day: "12",
-            month: "MARCH",
-            title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-            text: "Prepare yourself with a fitting Cosplay and book your slots"
-        },
-        {
-            day: "12",
-            month: "MARCH",
-            title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-            text: "Prepare yourself with a fitting Cosplay and book your slots"
-        },
-      ]
+      newsData: []
     }
   },
   computed: {
@@ -132,7 +46,19 @@ export default {
     },
     collapse() {
       this.visibleItems = 5
+    },
+    async fetchNews() {
+      try {
+        const response = await fetch('http://localhost:3000/api/news')
+        const data = await response.json()
+        this.newsData = data.news
+      } catch (error) {
+        console.error('Error fetching news:', error)
+      }
     }
+  },
+  mounted() {
+    this.fetchNews()
   }
 }
 </script>
