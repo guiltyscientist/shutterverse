@@ -1,4 +1,3 @@
-<!-- Welcome.vue -->
 <template>
     <div class="welcome-container" ref="container">
         <img id="welcome-image" :src="images[currentIndex]" alt="Welcome to Shutterverse" class="welcome-image">
@@ -21,10 +20,7 @@
 export default {
     data() {
         return {
-            images: [
-                'src/assets/studios/IMG_7028.JPG',
-                'src/assets/studios/IMG_7411.JPG'
-            ],
+            images: [],
             currentIndex: 0,
             scale: 1,
             opacity: 1
@@ -50,9 +46,20 @@ export default {
             const visibleRatio = Math.max(0, Math.min(1, containerRect.bottom / windowHeight))
             this.scale = 0.3 + 0.7 * visibleRatio
             this.opacity = 0.3 + 0.7 * visibleRatio
+        },
+        fetchStudios() {
+            fetch('http://localhost:3000/api/studios')
+                .then(response => response.json())
+                .then(data => {
+                    this.images = data.studios.map(studio => studio.image)
+                })
+                .catch(error => {
+                    console.error('Error fetching studios:', error)
+                })
         }
     },
     mounted() {
+        this.fetchStudios()
         window.addEventListener('scroll', this.handleScroll)
     },
     beforeDestroy() {

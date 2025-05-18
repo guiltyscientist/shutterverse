@@ -26,7 +26,7 @@
       >
         <div class="studio-image-container">
           <img
-            :src="studio.details.image"
+            :src="studio.image"
             :alt="studio.details.title"
             class="studio-image"
           />
@@ -56,33 +56,19 @@ export default {
   components: {
     SectionDivider,
   },
-  props: {
-    studios: {
-      type: Array,
-      required: true,
-      default: () => [
-        {
-          id: "stud1",
-          image: "src/assets/studios/IMG_7028.JPG",
-          title: "Studio_1",
-          details: {
-            image: "src/assets/studios/IMG_7028.JPG",
-            title: "EASTER STUDIO",
-            description: `Step into our spring-themed wonderland...`, 
-          },
-        },
-        {
-          id: "stud2",
-          image: "src/assets/studios/IMG_7411.JPG",
-          title: "Studio_2",
-          details: {
-            image: "src/assets/studios/IMG_7411.JPG",
-            title: "EASTER STUDIO",
-            description: `Step into our spring-themed wonderland...`, 
-          },
-        },
-      ],
-    },
+  data() {
+    return {
+      studios: [],
+    };
+  },
+  async mounted() {
+    try {
+      const response = await fetch('http://localhost:3000/api/studios');
+      const data = await response.json();
+      this.studios = data.studios;
+    } catch (error) {
+      console.error('Error fetching studios:', error);
+    }
   },
   methods: {
     scrollToTop() {
