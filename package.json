@@ -9,11 +9,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "morgan": "^1.10.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "vue": "^3.5.13"
+    "morgan": "^1.10.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",

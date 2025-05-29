@@ -71,6 +71,7 @@ export default {
     }
   },
   methods: {
+  
     scrollToTop() {
       const studiosSection = document.getElementById("studios");
       if (studiosSection) {

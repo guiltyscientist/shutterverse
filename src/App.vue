@@ -1,17 +1,11 @@
 <script setup>
-import Header from './components/Header.vue';
-import Welcome from './components/Welcome.vue';
-import News from './components/News.vue'
-import SectionDivider from './components/SectionDivider.vue';
-import Studios from './components/Studios.vue';
+import Header from './components/website/Header.vue';
+import { RouterView } from 'vue-router';
 </script>
 
 <template>
   <Header />
-  <Welcome />
-  <News />
-  <SectionDivider />
-  <Studios />
+  <RouterView />
 </template>
 
 <style scoped>

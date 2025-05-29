@@ -14,8 +14,12 @@
       </div>
     </div>
     <div class="see-more-container">
-      <button v-if="showSeeMore" id="see-more-btn" @click="seeMore">SEE MORE</button>
-      <button v-if="showCollapse" id="collapse-btn" @click="collapse">COLLAPSE</button>
+      <button v-if="showSeeMore" id="see-more-btn" @click="seeMore">
+        SEE MORE
+      </button>
+      <button v-if="showCollapse" id="collapse-btn" @click="collapse">
+        COLLAPSE
+      </button>
     </div>
   </section>
 </template>
@@ -26,41 +30,44 @@ export default {
     return {
       visibleItems: 5,
       batchSize: 5,
-      newsData: []
-    }
+      newsData: [],
+    };
   },
   computed: {
     visibleNews() {
-      return this.newsData.slice(0, this.visibleItems)
+      return this.newsData.slice(0, this.visibleItems);
     },
     showSeeMore() {
-      return this.visibleItems < this.newsData.length
+      return this.visibleItems < this.newsData.length;
     },
     showCollapse() {
-      return this.visibleItems > 5
-    }
+      return this.visibleItems > 5;
+    },
   },
   methods: {
     seeMore() {
-      this.visibleItems = Math.min(this.visibleItems + this.batchSize, this.newsData.length)
+      this.visibleItems = Math.min(
+        this.visibleItems + this.batchSize,
+        this.newsData.length
+      );
     },
     collapse() {
-      this.visibleItems = 5
+      this.visibleItems = 5;
     },
     async fetchNews() {
       try {
-        const response = await fetch('http://localhost:3000/api/news')
-        const data = await response.json()
-        this.newsData = data.news
+        const response = await fetch("http://localhost:3000/api/news");
+        const data = await response.json();
+        this.newsData = data.news;
       } catch (error) {
-        console.error('Error fetching news:', error)
+        console.error("Error fetching news:", error);
       }
-    }
+    },
   },
   mounted() {
-    this.fetchNews()
-  }
-}
+    this.fetchNews();
+  },
+};
 </script>
 
 <style scoped>

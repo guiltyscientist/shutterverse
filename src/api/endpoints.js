@@ -2,6 +2,11 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -177,6 +182,110 @@ app.use((req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+});
+
+
+/* The following methods are implemented in advance for the future admin area of the website */
+
+app.post('/api/news', (req, res) => {
+    const { day, month, title, text } = req.body;
+    if (!day || !month || !title || !text) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    const maxId = news.length > 0 ? Math.max(...news.map(item => item.id)) : 0;
+    const newItem = {
+        id: maxId + 1,
+        day,
+        month,
+        title,
+        text
+    };
+    news.push(newItem);
+    res.status(201).json(newItem);
+});
+
+app.put('/api/news/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+        return res.status(400).json({ error: 'Invalid ID' });
+    }
+    const { day, month, title, text } = req.body;
+    if (!day || !month || !title || !text) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    const index = news.findIndex(item => item.id === id);
+    if (index === -1) {
+        return res.status(404).json({ error: 'News item not found' });
+    }
+    news[index] = { id, day, month, title, text };
+    res.json(news[index]);
+});
+
+app.delete('/api/news/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+        return res.status(400).json({ error: 'Invalid ID' });
+    }
+    const index = news.findIndex(item => item.id === id);
+    if (index === -1) {
+        return res.status(404).json({ error: 'News item not found' });
+    }
+    news.splice(index, 1);
+    res.status(204).end();
+});
+
+app.post('/api/studios', (req, res) => {
+    const { image, title, details } = req.body;
+    if (!image || !title || !details) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    const studioIds = studios.map(studio => parseInt(studio.id.split('-')[1]));
+    const maxId = studioIds.length > 0 ? Math.max(...studioIds) : 0;
+    const newStudio = {
+        id: `studio-${maxId + 1}`,
+        image,
+        title,
+        details
+    };
+    studios.push(newStudio);
+    res.status(201).json(newStudio);
+});
+
+app.put('/api/studios/:id', (req, res) => {
+    const { id } = req.params;
+    const { image, title, details } = req.body;
+    if (!image || !title || !details) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+    const index = studios.findIndex(item => item.id === id);
+    if (index === -1) {
+        return res.status(404).json({ error: 'Studio not found' });
+    }
+    studios[index] = { id, image, title, details };
+    res.json(studios[index]);
+});
+
+app.delete('/api/studios/:id', (req, res) => {
+    const { id } = req.params;
+    const index = studios.findIndex(item => item.id === id);
+    if (index === -1) {
+        return res.status(404).json({ error: 'Studio not found' });
+    }
+    studios.splice(index, 1);
+    res.status(204).end();
+});
+
+// Authentication Endpoints
+app.post('/api/login', (req, res) => {
+    const { email, password } = req.body;
+    // Authentication logic
+    res.json({ success: true, token: 'jwt-sample-token' });
+});
+
+app.post('/api/register', (req, res) => {
+    const { email, password } = req.body;
+    // Registration logic
+    res.status(201).json({ success: true });
 });
 
 export default app;

@@ -1,10 +1,10 @@
 <template>
     <div class="welcome-container" ref="container">
-        <img id="welcome-image" :src="images[currentIndex]" alt="Welcome to Shutterverse" class="welcome-image">
+        <img id="welcome-image" :src="images[currentIndex]" alt="Welcome to Shutterverse" class="welcome-image" />
         <div class="overlay"></div>
         <div class="welcome-text">
             <h1 id="welcome-heading" :style="{ transform: `scale(${scale})`, opacity: opacity }">
-                Welcome to the<br>Shutterverse Studio!
+                Welcome to the<br />Shutterverse Studio!
             </h1>
         </div>
         <div class="arrow-area left" @click="previousImage">
@@ -23,49 +23,53 @@ export default {
             images: [],
             currentIndex: 0,
             scale: 1,
-            opacity: 1
-        }
+            opacity: 1,
+        };
     },
     methods: {
         nextImage() {
-            this.currentIndex = (this.currentIndex + 1) % this.images.length
+            this.currentIndex = (this.currentIndex + 1) % this.images.length;
         },
         previousImage() {
-            this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length
+            this.currentIndex =
+                (this.currentIndex - 1 + this.images.length) % this.images.length;
         },
         handleScroll() {
-            const containerRect = this.$refs.container.getBoundingClientRect()
-            const windowHeight = window.innerHeight
+            const containerRect = this.$refs.container.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
 
             if (containerRect.bottom <= 0) {
-                this.scale = 0.6
-                this.opacity = 0
-                return
+                this.scale = 0.6;
+                this.opacity = 0;
+                return;
             }
 
-            const visibleRatio = Math.max(0, Math.min(1, containerRect.bottom / windowHeight))
-            this.scale = 0.3 + 0.7 * visibleRatio
-            this.opacity = 0.3 + 0.7 * visibleRatio
+            const visibleRatio = Math.max(
+                0,
+                Math.min(1, containerRect.bottom / windowHeight)
+            );
+            this.scale = 0.3 + 0.7 * visibleRatio;
+            this.opacity = 0.3 + 0.7 * visibleRatio;
         },
         fetchStudios() {
-            fetch('http://localhost:3000/api/studios')
-                .then(response => response.json())
-                .then(data => {
-                    this.images = data.studios.map(studio => studio.image)
+            fetch("http://localhost:3000/api/studios")
+                .then((response) => response.json())
+                .then((data) => {
+                    this.images = data.studios.map((studio) => studio.image);
                 })
-                .catch(error => {
-                    console.error('Error fetching studios:', error)
-                })
-        }
+                .catch((error) => {
+                    console.error("Error fetching studios:", error);
+                });
+        },
     },
     mounted() {
-        this.fetchStudios()
-        window.addEventListener('scroll', this.handleScroll)
+        this.fetchStudios();
+        window.addEventListener("scroll", this.handleScroll);
     },
     beforeDestroy() {
-        window.removeEventListener('scroll', this.handleScroll)
-    }
-}
+        window.removeEventListener("scroll", this.handleScroll);
+    },
+};
 </script>
 
 <style scoped>
