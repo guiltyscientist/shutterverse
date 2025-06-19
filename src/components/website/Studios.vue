@@ -27,7 +27,7 @@
         <div class="studio-image-container">
           <img
             :src="studio.image"
-            :alt="studio.details.title"
+            :alt="studio.details.name"
             class="studio-image"
           />
         </div>
@@ -36,7 +36,7 @@
             ← Studio Overview
           </button>
           <div class="studio-text-content">
-            <h2 class="studio-title">{{ studio.details.title }}</h2>
+            <h2 class="studio-title">{{ studio.details.name }}</h2>
             <div class="studio-divider"></div>
             <p
               class="studio-description"

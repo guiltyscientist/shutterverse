@@ -4,6 +4,10 @@ import logger from 'morgan';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { MongoClient, ServerApiVersion } from 'mongodb';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,275 +21,232 @@ app.use('/assets', express.static('public/assets'));
 app.use(cookieParser());
 app.use(cors());
 
-let news = [
-    {
-        id: 1,
-        day: "27",
-        month: "APRIL",
-        title: "New Studio – <strong>EASTER</strong> theme starts on the 27th of April",
-        text: "Prepare yourself with a fitting Cosplay and book your slots"
-    },
-    {
-        id: 2,
-        day: "27",
-        month: "APRIL",
-        title: "New Studio – <strong>EASTER</strong> theme starts on the 27th of April",
-        text: "Prepare yourself with a fitting Cosplay and book your slots"
-    },
-    {
-        id: 3,
-        day: "03",
-        month: "MARCH",
-        title: "New Studio – <strong>RETRO</strong> theme starts on the 3rd of March",
-        text: "Prepare yourself with a fitting Cosplay and book your slots"
-    },
-    {
-        id: 4,
-        day: "12",
-        month: "MARCH",
-        title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-        text: "Prepare yourself with a fitting Cosplay and book your slots"
-    },
-    {
-        id: 5,
-        day: "12",
-        month: "MARCH",
-        title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-        text: "Prepare yourself with a fitting Cosplay and book your slots"
-    },
-    {
-        id: 6,
-        day: "12",
-        month: "MARCH",
-        title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-        text: "Prepare yourself with a fitting Cosplay and book your slots"
-    },
-    {
-        id: 7,
-        day: "12",
-        month: "MARCH",
-        title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-        text: "Prepare yourself with a fitting Cosplay and book your slots"
-    },
-    {
-        id: 8,
-        day: "12",
-        month: "MARCH",
-        title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-        text: "Prepare yourself with a fitting Cosplay and book your slots"
-    },
-    {
-        id: 9,
-        day: "12",
-        month: "MARCH",
-        title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-        text: "Prepare yourself with a fitting Cosplay and book your slots"
-    },
-    {
-        id: 10,
-        day: "12",
-        month: "MARCH",
-        title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-        text: "Prepare yourself with a fitting Cosplay and book your slots"
-    },
-    {
-        id: 12,
-        day: "12",
-        month: "MARCH",
-        title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-        text: "Prepare yourself with a fitting Cosplay and book your slots"
-    },
-    {
-        id: 13,
-        day: "12",
-        month: "MARCH",
-        title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-        text: "Prepare yourself with a fitting Cosplay and book your slots"
-    },
-    {
-        id: 14,
-        day: "12",
-        month: "MARCH",
-        title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-        text: "Prepare yourself with a fitting Cosplay and book your slots"
-    },
-    {
-        id: 15,
-        day: "12",
-        month: "MARCH",
-        title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-        text: "Prepare yourself with a fitting Cosplay and book your slots"
-    },
-    {
-        id: 16,
-        day: "12",
-        month: "MARCH",
-        title: "New Studio – <strong>SPRING</strong> theme starts on the 12th of March",
-        text: "Prepare yourself with a fitting Cosplay and book your slots"
-    },
-];
-
-let studios = [
-    {
-        id: "studio-1",
-        image: "src/assets/studios/IMG_7028.JPG",
-        title: "Studio_1",
-        details: {
-            title: "EASTER STUDIO",
-            description: `Step into our spring-themed wonderland...`,
-        },
-    },
-    {
-        id: "studio-2",
-        image: "src/assets/studios/IMG_7411.JPG",
-        title: "Studio_2",
-        details: {
-            title: "EASTER STUDIO",
-            description: `Step into our spring-themed wonderland...`,
-        },
-    },
-];
-
-app.get('/api/news', (req, res) => {
-    res.json({ news });
-});
-
-app.get('/api/news/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const newsItem = news.find(item => item.id === id);
-
-    if (!newsItem) {
-        return res.status(404).json({ error: 'News item not found' });
+const client = new MongoClient(process.env.DB_CONNECTION, {
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true
     }
+})
 
-    res.json(newsItem);
-});
+let db, newsCollection, studioCollection, userCollection;
 
-app.get('/api/studios', (req, res) => {
-    res.json({ studios });
-});
-
-app.get('/api/studios/:id', (req, res) => {
-    const studioItem = studios.find(item => item.id === req.params.id);
-
-    if (!studioItem) {
-        return res.status(404).json({ error: 'Studio item not found' });
+async function connectDB() {
+    try {
+        await client.connect();
+        db =  client.db("Shutterverse");
+        newsCollection = db.collection("News");
+        studioCollection = db.collection("Studios");
+        userCollection = db.collection("Users");
+        console.log("Connection to DB successful");
+    } catch (err) {
+        console.error("Error during DB connection: " + err);
     }
+}
 
-    res.json(studioItem);
+connectDB().then(() => {
+    app.listen(process.env.PORT, () => {
+        console.log(`Server running on port ${process.env.PORT}`);
+    });
 });
 
-app.use((req, res) => {
-    res.status(404).json({ error: 'Endpoint not found' });
+app.get('/api/news', async (req, res) => {
+    try {
+        const news = await newsCollection.find().toArray();
+        res.json({ news });
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+app.get('/api/news/:id', async (req, res) => {
+    try {
+        const newsItem = await newsCollection.findOne({ id: parseInt(req.params.id) });
+        if (!newsItem) return res.status(404).json({ error: 'News item not found' });
+        res.json(newsItem);
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
-
-/* The following methods are implemented in advance for the future admin area of the website */
-
-app.post('/api/news', (req, res) => {
+app.post('/api/news', async (req, res) => {
     const { day, month, title, text } = req.body;
     if (!day || !month || !title || !text) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
-    const maxId = news.length > 0 ? Math.max(...news.map(item => item.id)) : 0;
-    const newItem = {
-        id: maxId + 1,
-        day,
-        month,
-        title,
-        text
-    };
-    news.push(newItem);
-    res.status(201).json(newItem);
+
+    try {
+        const lastItem = await newsCollection.find().sort({ id: -1 }).limit(1).toArray();
+        const newId = lastItem.length > 0 ? lastItem[0].id + 1 : 1;
+
+        const newItem = { id: newId, day, month, title, text };
+        await newsCollection.insertOne(newItem);
+        res.status(201).json(newItem);
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
-app.put('/api/news/:id', (req, res) => {
+app.put('/api/news/:id', async (req, res) => {
     const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-        return res.status(400).json({ error: 'Invalid ID' });
-    }
     const { day, month, title, text } = req.body;
+
     if (!day || !month || !title || !text) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
-    const index = news.findIndex(item => item.id === id);
-    if (index === -1) {
-        return res.status(404).json({ error: 'News item not found' });
+
+    try {
+        const result = await newsCollection.updateOne(
+            { id },
+            { $set: { day, month, title, text } }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ error: 'News item not found' });
+        }
+
+        res.json({ id, day, month, title, text });
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
     }
-    news[index] = { id, day, month, title, text };
-    res.json(news[index]);
 });
 
-app.delete('/api/news/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-        return res.status(400).json({ error: 'Invalid ID' });
+app.delete('/api/news/:id', async (req, res) => {
+    try {
+        const result = await newsCollection.deleteOne({ id: parseInt(req.params.id) });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: 'News item not found' });
+        }
+        res.status(204).end();
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
     }
-    const index = news.findIndex(item => item.id === id);
-    if (index === -1) {
-        return res.status(404).json({ error: 'News item not found' });
-    }
-    news.splice(index, 1);
-    res.status(204).end();
 });
 
-app.post('/api/studios', (req, res) => {
+app.get('/api/studios', async (req, res) => {
+    try {
+        const studios = await studioCollection.find().toArray();
+        res.json({ studios });
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.get('/api/studios/:id', async (req, res) => {
+    try {
+        const studio = await studioCollection.findOne({ id: req.params.id });
+        if (!studio) return res.status(404).json({ error: 'Studio not found' });
+        res.json(studio);
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.post('/api/studios', async (req, res) => {
     const { image, title, details } = req.body;
-    if (!image || !title || !details) {
-        return res.status(400).json({ error: 'Missing required fields' });
+    if (!image || !title || !details || !details.name || !details.description) {
+        return res.status(400).json({
+            error: 'Missing required fields. Needs: image, title, details.name, details.description'
+        });
     }
-    const studioIds = studios.map(studio => parseInt(studio.id.split('-')[1]));
-    const maxId = studioIds.length > 0 ? Math.max(...studioIds) : 0;
-    const newStudio = {
-        id: `studio-${maxId + 1}`,
-        image,
-        title,
-        details
-    };
-    studios.push(newStudio);
-    res.status(201).json(newStudio);
+
+    try {
+        const studios = await studioCollection.find().toArray();
+        const maxId = studios.reduce((max, studio) => {
+            const idNum = parseInt(studio.id.split('-')[1]);
+            return idNum > max ? idNum : max;
+        }, 0);
+
+        const newStudio = {
+            id: `studio-${maxId + 1}`,
+            image,
+            title,
+            details: {
+                name: details.name,
+                description: details.description
+            }
+        };
+
+        await studioCollection.insertOne(newStudio);
+        res.status(201).json(newStudio);
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
-app.put('/api/studios/:id', (req, res) => {
-    const { id } = req.params;
+app.put('/api/studios/:id', async (req, res) => {
     const { image, title, details } = req.body;
-    if (!image || !title || !details) {
-        return res.status(400).json({ error: 'Missing required fields' });
+    if (!image || !title || !details || !details.name || !details.description) {
+        return res.status(400).json({
+            error: 'Missing required fields. Needs: image, title, details.name, details.description'
+        });
     }
-    const index = studios.findIndex(item => item.id === id);
-    if (index === -1) {
-        return res.status(404).json({ error: 'Studio not found' });
+
+    try {
+        const result = await studioCollection.updateOne(
+            { id: req.params.id },
+            {
+                $set: {
+                    image,
+                    title,
+                    details: {
+                        name: details.name,
+                        description: details.description
+                    }
+                }
+            }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ error: 'Studio not found' });
+        }
+
+        const updatedStudio = await studioCollection.findOne({ id: req.params.id });
+        res.json(updatedStudio);
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
     }
-    studios[index] = { id, image, title, details };
-    res.json(studios[index]);
 });
 
-app.delete('/api/studios/:id', (req, res) => {
-    const { id } = req.params;
-    const index = studios.findIndex(item => item.id === id);
-    if (index === -1) {
-        return res.status(404).json({ error: 'Studio not found' });
+app.delete('/api/studios/:id', async (req, res) => {
+    try {
+        const result = await studioCollection.deleteOne({ id: req.params.id });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: 'Studio not found' });
+        }
+        res.status(204).end();
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
     }
-    studios.splice(index, 1);
-    res.status(204).end();
 });
 
-// Authentication Endpoints
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
-    // Authentication logic
-    res.json({ success: true, token: 'jwt-sample-token' });
-});
 
-app.post('/api/register', (req, res) => {
-    const { email, password } = req.body;
-    // Registration logic
-    res.status(201).json({ success: true });
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    try {
+        const user = await userCollection.findOne({ email });
+
+        if (!user) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        if (user.password !== password) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        res.json({
+            success: true,
+            role: user.role,
+            userId: user._id
+        });
+    } catch (err) {
+        console.error('Login error:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
 });
 
 export default app;
