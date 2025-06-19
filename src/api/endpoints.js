@@ -3,6 +3,8 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import cors from 'cors';
 import path from 'path';
+import http from 'http';
+import { WebSocketServer } from 'ws';
 import { fileURLToPath } from 'url';
 import { MongoClient, ServerApiVersion } from 'mongodb';
 import dotenv from 'dotenv';
@@ -14,12 +16,21 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
+const clients = new Set();
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use('/assets', express.static('public/assets'));
 app.use(cookieParser());
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173', // Your frontend origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
 
 const client = new MongoClient(process.env.DB_CONNECTION, {
     serverApi: {
@@ -44,11 +55,39 @@ async function connectDB() {
     }
 }
 
-connectDB().then(() => {
-    app.listen(process.env.PORT, () => {
-        console.log(`Server running on port ${process.env.PORT}`);
+wss.on('connection', (ws) => {
+    clients.add(ws);
+
+    ws.on('close', () => {
+        clients.delete(ws);
     });
 });
+
+connectDB().then(() => {
+    server.listen(process.env.PORT, () => {
+        console.log(`Server running on port ${process.env.PORT} (HTTP & WebSocket)`);
+    });
+});
+
+function broadcastNewsUpdate(type, data) {
+    const message = JSON.stringify({
+        type,
+        data
+    });
+
+    clients.forEach(client => {
+        try {
+            if (client.readyState === 1) { // OPEN state
+                client.send(message);
+                console.log(`Broadcasted ${type} message:`, data); // Add for debugging
+            }
+        } catch (err) {
+            console.error('Error sending WebSocket message:', err);
+            clients.delete(client);
+        }
+    });
+}
+  
 
 app.get('/api/news', async (req, res) => {
     try {
@@ -81,6 +120,7 @@ app.post('/api/news', async (req, res) => {
 
         const newItem = { id: newId, day, month, title, text };
         await newsCollection.insertOne(newItem);
+        broadcastNewsUpdate('create', newItem);
         res.status(201).json(newItem);
     } catch (err) {
         res.status(500).json({ error: 'Database error' });
@@ -104,7 +144,7 @@ app.put('/api/news/:id', async (req, res) => {
         if (result.matchedCount === 0) {
             return res.status(404).json({ error: 'News item not found' });
         }
-
+        broadcastNewsUpdate('update', { id, day, month, title, text });
         res.json({ id, day, month, title, text });
     } catch (err) {
         res.status(500).json({ error: 'Database error' });
@@ -117,6 +157,7 @@ app.delete('/api/news/:id', async (req, res) => {
         if (result.deletedCount === 0) {
             return res.status(404).json({ error: 'News item not found' });
         }
+        broadcastNewsUpdate('delete', parseInt(req.params.id));
         res.status(204).end();
     } catch (err) {
         res.status(500).json({ error: 'Database error' });
