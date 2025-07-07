@@ -4,9 +4,11 @@ import logger from 'morgan';
 import cors from 'cors';
 import path from 'path';
 import http from 'http';
+import multer from 'multer';
+import fs from 'fs';
 import { WebSocketServer } from 'ws';
 import { fileURLToPath } from 'url';
-import { MongoClient, ServerApiVersion } from 'mongodb';
+import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -23,10 +25,21 @@ const clients = new Set();
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use('/assets', express.static('public/assets'));
+app.use(
+    '/assets/images/news',
+    express.static(path.join(__dirname, 'assets/images/news'))
+);
+app.use(
+    '/assets/images/studios',
+    express.static(path.join(__dirname, 'assets/images/studios'))
+);
+app.use(
+    '/assets/images/team',
+    express.static(path.join(__dirname, 'assets/images/team'))
+);
 app.use(cookieParser());
 app.use(cors({
-    origin: 'http://localhost:5173', // Your frontend origin
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
@@ -40,15 +53,16 @@ const client = new MongoClient(process.env.DB_CONNECTION, {
     }
 })
 
-let db, newsCollection, studioCollection, userCollection;
+let db, newsCollection, studioCollection, userCollection, teamCollection;
 
 async function connectDB() {
     try {
         await client.connect();
-        db =  client.db("Shutterverse");
+        db = client.db("Shutterverse");
         newsCollection = db.collection("News");
         studioCollection = db.collection("Studios");
         userCollection = db.collection("Users");
+        teamCollection = db.collection("Team");
         console.log("Connection to DB successful");
     } catch (err) {
         console.error("Error during DB connection: " + err);
@@ -77,9 +91,9 @@ function broadcastNewsUpdate(type, data) {
 
     clients.forEach(client => {
         try {
-            if (client.readyState === 1) { // OPEN state
+            if (client.readyState === 1) {
                 client.send(message);
-                console.log(`Broadcasted ${type} message:`, data); // Add for debugging
+                console.log(`Broadcasted ${type} message:`, data);
             }
         } catch (err) {
             console.error('Error sending WebSocket message:', err);
@@ -87,7 +101,79 @@ function broadcastNewsUpdate(type, data) {
         }
     });
 }
-  
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dir = path.join(__dirname, 'assets/images/news');
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const ext = path.extname(file.originalname);
+        cb(null, uniqueSuffix + ext);
+    }
+});
+
+const studioStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dir = path.join(__dirname, 'assets/images/studios');
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const ext = path.extname(file.originalname);
+        cb(null, uniqueSuffix + ext);
+    }
+});
+
+const teamStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dir = path.join(__dirname, 'assets/images/team');
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const ext = path.extname(file.originalname);
+        cb(null, uniqueSuffix + ext);
+    }
+});
+
+const upload = multer({ storage });
+const studioUpload = multer({ storage: studioStorage });
+const teamUpload = multer({ storage: teamStorage });
+
+app.post('/api/upload', upload.single('image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+    const relativePath = `assets/images/news/${req.file.filename}`;
+    res.json({ imagePath: relativePath });
+});
+
+app.post('/api/upload/studio', studioUpload.single('image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+    const relativePath = `assets/images/studios/${req.file.filename}`;
+    res.json({ imagePath: relativePath });
+});
+
+app.post('/api/upload/team', teamUpload.single('image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+    const relativePath = `assets/images/team/${req.file.filename}`;
+    res.json({ imagePath: relativePath });
+});
 
 app.get('/api/news', async (req, res) => {
     try {
@@ -109,8 +195,8 @@ app.get('/api/news/:id', async (req, res) => {
 });
 
 app.post('/api/news', async (req, res) => {
-    const { day, month, title, text } = req.body;
-    if (!day || !month || !title || !text) {
+    const { day, month, title, text, image, year } = req.body;
+    if (!day || !month || !title || !text || !year) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -118,7 +204,15 @@ app.post('/api/news', async (req, res) => {
         const lastItem = await newsCollection.find().sort({ id: -1 }).limit(1).toArray();
         const newId = lastItem.length > 0 ? lastItem[0].id + 1 : 1;
 
-        const newItem = { id: newId, day, month, title, text };
+        const newItem = {
+            id: newId,
+            day,
+            month,
+            title,
+            text,
+            image: image || null,
+            year
+        };
         await newsCollection.insertOne(newItem);
         broadcastNewsUpdate('create', newItem);
         res.status(201).json(newItem);
@@ -129,23 +223,23 @@ app.post('/api/news', async (req, res) => {
 
 app.put('/api/news/:id', async (req, res) => {
     const id = parseInt(req.params.id);
-    const { day, month, title, text } = req.body;
+    const { day, month, title, text, image, year } = req.body;
 
-    if (!day || !month || !title || !text) {
+    if (!day || !month || !title || !text || !year) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
 
     try {
         const result = await newsCollection.updateOne(
             { id },
-            { $set: { day, month, title, text } }
+            { $set: { day, month, title, text, image, year } }
         );
 
         if (result.matchedCount === 0) {
             return res.status(404).json({ error: 'News item not found' });
         }
-        broadcastNewsUpdate('update', { id, day, month, title, text });
-        res.json({ id, day, month, title, text });
+        broadcastNewsUpdate('update', { id, day, month, title, text, image, year });
+        res.json({ id, day, month, title, text, year });
     } catch (err) {
         res.status(500).json({ error: 'Database error' });
     }
@@ -173,6 +267,7 @@ app.get('/api/studios', async (req, res) => {
     }
 });
 
+
 app.get('/api/studios/:id', async (req, res) => {
     try {
         const studio = await studioCollection.findOne({ id: req.params.id });
@@ -184,7 +279,8 @@ app.get('/api/studios/:id', async (req, res) => {
 });
 
 app.post('/api/studios', async (req, res) => {
-    const { image, title, details } = req.body;
+    const { image, title, details, booking } = req.body;
+
     if (!image || !title || !details || !details.name || !details.description) {
         return res.status(400).json({
             error: 'Missing required fields. Needs: image, title, details.name, details.description'
@@ -202,9 +298,11 @@ app.post('/api/studios', async (req, res) => {
             id: `studio-${maxId + 1}`,
             image,
             title,
+            booking: booking || null,
             details: {
                 name: details.name,
-                description: details.description
+                description: details.description,
+                features: details.features || null
             }
         };
 
@@ -216,7 +314,8 @@ app.post('/api/studios', async (req, res) => {
 });
 
 app.put('/api/studios/:id', async (req, res) => {
-    const { image, title, details } = req.body;
+    const { image, title, details, booking } = req.body;
+
     if (!image || !title || !details || !details.name || !details.description) {
         return res.status(400).json({
             error: 'Missing required fields. Needs: image, title, details.name, details.description'
@@ -230,9 +329,11 @@ app.put('/api/studios/:id', async (req, res) => {
                 $set: {
                     image,
                     title,
+                    booking: booking || null,
                     details: {
                         name: details.name,
-                        description: details.description
+                        description: details.description,
+                        features: details.features || null
                     }
                 }
             }
@@ -286,6 +387,204 @@ app.post('/api/login', async (req, res) => {
         });
     } catch (err) {
         console.error('Login error:', err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.get('/api/users', async (req, res) => {
+    try {
+        const users = await userCollection.find({}, { projection: { password: 0 } }).toArray();
+        const usersWithStringIds = users.map(user => ({
+            ...user,
+            _id: user._id.toString()
+        }));
+        res.json(usersWithStringIds);
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.post('/api/users', async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+    }
+
+    try {
+        const existingUser = await userCollection.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email already exists' });
+        }
+
+        const newUser = {
+            email,
+            password: 'Password1234',
+            role: 'user',
+            name: ''
+        };
+
+        const result = await userCollection.insertOne(newUser);
+        const createdUser = {
+            _id: result.insertedId,
+            email: newUser.email,
+            role: newUser.role,
+            name: newUser.name
+        };
+        res.status(201).json(createdUser);
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.put('/api/users/:id/reset-password', async (req, res) => {
+    const id = req.params.id;
+    try {
+        const objectId = new ObjectId(id);
+        const result = await userCollection.updateOne(
+            { _id: objectId },
+            { $set: { password: 'Password1234' } }
+        );
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        res.json({ success: true });
+    } catch (err) {
+        if (err.name === 'BSONError') {
+            return res.status(400).json({ error: 'Invalid user ID format' });
+        }
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.put('/api/users/:id/toggle-admin', async (req, res) => {
+    const id = req.params.id;
+
+    try {
+        const user = await userCollection.findOne({ _id: new ObjectId(id) });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const newRole = user.role === 'admin' ? 'user' : 'admin';
+
+        await userCollection.updateOne(
+            { _id: new ObjectId(id) },
+            { $set: { role: newRole } }
+        );
+
+        res.json({ success: true, newRole });
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.delete('/api/users/:id', async (req, res) => {
+    try {
+        const result = await userCollection.deleteOne({ _id: new ObjectId(req.params.id) });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        res.status(204).end();
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.get('/api/team-members', async (req, res) => {
+    try {
+        const teamMembers = await teamCollection.find().toArray();
+        res.json({ teamMembers });
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.get('/api/team-members/:id', async (req, res) => {
+    try {
+        const teamMember = await teamCollection.findOne({ _id: new ObjectId(req.params.id) });
+        if (!teamMember) return res.status(404).json({ error: 'Team member not found' });
+        res.json(teamMember);
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.post('/api/team-members', async (req, res) => {
+    const { teamNo, Name, Occupation, Description, SocialMedia, Image } = req.body;
+
+    if (!teamNo || !Name || !Occupation || !Description) {
+        return res.status(400).json({
+            error: 'Missing required fields. Needs: teamNo, Name, Occupation, Description'
+        });
+    }
+
+    try {
+        const newMember = {
+            teamNo,
+            Name,
+            Occupation,
+            Description,
+            SocialMedia: SocialMedia || {},
+            Image: Image || null
+        };
+
+        const result = await teamCollection.insertOne(newMember);
+        res.status(201).json({ ...newMember, _id: result.insertedId });
+    } catch (err) {
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.put('/api/team-members/:id', async (req, res) => {
+    const id = req.params.id;
+    const { teamNo, Name, Occupation, Description, SocialMedia, Image } = req.body;
+
+    if (!teamNo || !Name || !Occupation || !Description) {
+        return res.status(400).json({
+            error: 'Missing required fields. Needs: teamNo, Name, Occupation, Description'
+        });
+    }
+
+    try {
+        const objectId = new ObjectId(id);
+
+        const result = await teamCollection.updateOne(
+            { _id: objectId },
+            {
+                $set: {
+                    teamNo,
+                    Name,
+                    Occupation,
+                    Description,
+                    SocialMedia: SocialMedia || {},
+                    Image: Image || null
+                }
+            }
+        );
+
+        if (result.matchedCount === 0) {
+            return res.status(404).json({ error: 'Team member not found' });
+        }
+
+        const updatedMember = await teamCollection.findOne({ _id: objectId });
+        res.json(updatedMember);
+    } catch (err) {
+        if (err.name === 'BSONError') {
+            return res.status(400).json({ error: 'Invalid ID format' });
+        }
+        res.status(500).json({ error: 'Database error' });
+    }
+});
+
+app.delete('/api/team-members/:id', async (req, res) => {
+    try {
+        const result = await teamCollection.deleteOne({ _id: new ObjectId(req.params.id) });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: 'Team member not found' });
+        }
+        res.status(204).end();
+    } catch (err) {
         res.status(500).json({ error: 'Database error' });
     }
 });

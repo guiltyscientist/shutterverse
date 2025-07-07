@@ -7,22 +7,22 @@ export default {
   props: {
     color: {
       type: String,
-      default: 'var(--darkgrey)'
+      default: "var(--darkgrey)",
     },
     height: {
       type: String,
-      default: '5rem'
-    }
+      default: "5rem",
+    },
   },
   computed: {
     dividerStyle() {
       return {
         backgroundColor: this.color,
-        height: this.height
-      }
-    }
-  }
-}
+        height: this.height,
+      };
+    },
+  },
+};
 </script>
 
 <style scoped>

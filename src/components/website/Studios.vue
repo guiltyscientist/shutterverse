@@ -8,7 +8,11 @@
           :href="'#' + studio.id"
           class="studio-item"
         >
-          <img :src="studio.image" :alt="studio.title" class="studio-image" />
+          <img
+            :src="'http://localhost:3000/' + studio.image"
+            :alt="studio.title"
+            class="studio-image"
+          />
           <div class="studio-overlay"></div>
           <div class="studio-info">
             <h3>{{ studio.title }}</h3>
@@ -26,16 +30,16 @@
       >
         <div class="studio-image-container">
           <img
-            :src="studio.image"
+            :src="'http://localhost:3000/' + studio.image"
             :alt="studio.details.name"
             class="studio-image"
           />
         </div>
         <div class="studio-info-container">
-          <button class="return-button" @click="scrollToTop">
-            ← Studio Overview
-          </button>
           <div class="studio-text-content">
+            <button class="return-button" @click="scrollToTop">
+              ← Studio Overview
+            </button>
             <h2 class="studio-title">{{ studio.details.name }}</h2>
             <div class="studio-divider"></div>
             <p
@@ -63,15 +67,14 @@ export default {
   },
   async mounted() {
     try {
-      const response = await fetch('http://localhost:3000/api/studios');
+      const response = await fetch("http://localhost:3000/api/studios");
       const data = await response.json();
       this.studios = data.studios;
     } catch (error) {
-      console.error('Error fetching studios:', error);
+      console.error("Error fetching studios:", error);
     }
   },
   methods: {
-  
     scrollToTop() {
       const studiosSection = document.getElementById("studios");
       if (studiosSection) {
@@ -181,10 +184,12 @@ export default {
 .studio-text-content {
   max-width: 600px;
   color: var(--whitegrey);
+  position: relative;
 }
 
 .studio-title {
   font-size: 3.5rem;
+  margin-top: 2rem;
   margin-bottom: 1.5rem;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -206,8 +211,8 @@ export default {
 
 .return-button {
   position: absolute;
-  top: 13rem;
-  left: 6rem;
+  top: -1.5rem;
+  left: 0;
   background: transparent;
   border: 2px solid var(--turquoise);
   color: var(--turquoise);
@@ -217,7 +222,7 @@ export default {
   text-transform: uppercase;
   letter-spacing: 1px;
   transition: all 0.3s ease;
-  z-index: 1000;
+  z-index: 10;
 }
 
 .return-button:hover {
@@ -225,8 +230,25 @@ export default {
 }
 
 .reverse-order .return-button {
-  left: auto;
-  right: 30rem;
+  left: 0;
+  right: auto;
+}
+
+@media (max-width: 1024px) {
+  .studio-title {
+    font-size: 2.8rem;
+    margin-top: -2rem;
+  }
+
+  .studio-description {
+    font-size: 1.1rem;
+  }
+
+  .return-button {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+    top: -5rem;
+  }
 }
 
 @media (max-width: 768px) {
@@ -245,30 +267,110 @@ export default {
 
   .feature-section {
     flex-direction: column;
+    height: auto;
+    min-height: 100vh;
   }
 
   .studio-image-container,
   .studio-info-container {
     width: 100%;
-    height: 100%;
+    height: 50vh;
+  }
+
+  .studio-info-container {
+    padding: 1.5rem;
+    align-items: flex-start;
+  }
+
+  .studio-text-content {
+    width: 100%;
+    padding-top: 1rem;
   }
 
   .studio-title {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
+    margin-top: 1.5rem;
+  }
+
+  .studio-divider {
+    margin: 1rem 0;
+    width: 90px;
   }
 
   .studio-description {
     font-size: 1rem;
+    line-height: 1.5;
   }
 
   .return-button {
-    top: 1rem;
-    left: 1rem;
+    position: absolute;
+    top: -1rem;
+    left: 0;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid var(--turquoise);
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    z-index: 10;
+    backdrop-filter: blur(4px);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .return-button:hover {
+    background: rgba(0, 0, 0, 0.8);
   }
 
   .reverse-order .return-button {
-    left: 1rem;
+    left: 0;
     right: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .studio-info h3 {
+    font-size: 1.3rem;
+    padding: 0.8rem 1.5rem;
+  }
+
+  .studio-image-container,
+  .studio-info-container {
+    height: 45vh;
+  }
+
+  .studio-title {
+    font-size: 1.8rem;
+    margin-top: -12rem;
+  }
+
+  .studio-description {
+    font-size: 0.95rem;
+  }
+
+  .return-button {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.8rem;
+    top: -15rem;
+  }
+
+  .studio-text-content {
+    padding-top: 0.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .studio-title {
+    font-size: 1.6rem;
+    margin-top: 1rem;
+  }
+
+  .studio-description {
+    font-size: 0.9rem;
+  }
+
+  .return-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+    top: -1rem;
   }
 }
 </style>
