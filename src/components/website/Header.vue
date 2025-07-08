@@ -71,7 +71,6 @@
           </ul>
         </li>
 
-        <!-- User Authentication Section -->
         <li v-if="!currentUser" class="auth-item">
           <div class="auth-links">
             <router-link to="/login" @click="closeMenu">Login</router-link>

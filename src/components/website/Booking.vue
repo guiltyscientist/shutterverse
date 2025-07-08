@@ -38,7 +38,7 @@
               <h4>Pricing:</h4>
               <div class="pricing-card">
                 <h5>Standard Rate</h5>
-                <div class="price">$120<span>/hour</span></div>
+                <div class="price">120€ / Session<span>/hour</span></div>
               </div>
             </div>
           </div>
