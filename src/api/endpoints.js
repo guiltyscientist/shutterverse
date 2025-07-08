@@ -405,7 +405,7 @@ app.get('/api/users', async (req, res) => {
 });
 
 app.post('/api/users', async (req, res) => {
-    const { email } = req.body;
+    const { email, name } = req.body;
 
     if (!email) {
         return res.status(400).json({ error: 'Email is required' });
@@ -421,7 +421,7 @@ app.post('/api/users', async (req, res) => {
             email,
             password: 'Password1234',
             role: 'user',
-            name: ''
+            name: name || ''
         };
 
         const result = await userCollection.insertOne(newUser);
@@ -440,6 +440,12 @@ app.post('/api/users', async (req, res) => {
 app.put('/api/users/:id/reset-password', async (req, res) => {
     const id = req.params.id;
     try {
+        if (!ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({
+                error: 'Invalid user ID format',
+                message: 'ID must be a 24-character hex string'
+            });
+        }
         const objectId = new ObjectId(id);
         const result = await userCollection.updateOne(
             { _id: objectId },

@@ -220,7 +220,6 @@ export default {
 
         this.users = data.map((u) => ({
           ...u,
-          _id: u.userId,
           name: u.name || u.email.split("@")[0],
         }));
         this.filterUsers();

@@ -163,6 +163,18 @@ export default {
     navigateToSection(section) {
       this.closeMenu();
 
+      if (section === 'top') {
+        if (this.$route.path === "/") {
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+          });
+        } else {
+          this.$router.push("/");
+        }
+        return;
+      }
+
       if (this.$route.path === "/") {
         this.scrollToSection(section);
       } else {
@@ -285,13 +297,19 @@ export default {
       });
     },
 
-    handleHomeClick() {
+    handleHomeClick(event) {
+      event.preventDefault();
+      
+      this.closeMenu();
+      
       if (this.$route.path === "/") {
-        this.scrollToTop();
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
       } else {
         this.$router.push("/");
       }
-      this.closeMenu();
     },
   },
   watch: {

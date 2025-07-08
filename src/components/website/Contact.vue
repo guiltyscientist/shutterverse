@@ -160,7 +160,6 @@ export default {
 <style scoped>
 .contact-section {
   background: var(--darkgrey);
-
   color: var(--whitegrey);
   display: flex;
   flex-direction: column;
