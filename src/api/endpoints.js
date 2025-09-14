@@ -86,8 +86,8 @@ wss.on('connection', (ws) => {
 });
 
 connectDB().then(() => {
-    server.listen(process.env.PORT, () => {
-        console.log(`Server running on port ${process.env.PORT} (HTTP & WebSocket)`);
+    server.listen(process.env.PORT, '0.0.0.0', () => {
+        console.log(`Server running on port ${process.env.PORT || 3000} (HTTP & WebSocket)`);
     });
 });
 
