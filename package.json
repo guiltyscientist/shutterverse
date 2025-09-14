@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node endpoints.js",
-    "start": "node endpoints.js",
+    "dev": "node src/api/endpoints.js",
+    "start": "node src/api/endpoints.js",
     "build": "echo 'Build complete'"
   },
   "dependencies": {
