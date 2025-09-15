@@ -32,16 +32,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(
     '/assets/images/news',
-    express.static(path.join(__dirname, 'assets/images/news'))
+    express.static(path.join(process.cwd(), 'src/assets/images/news'))
 );
 app.use(
     '/assets/images/studios',
-    express.static(path.join(__dirname, 'assets/images/studios'))
+    express.static(path.join(process.cwd(), 'src/assets/images/studios'))
 );
 app.use(
     '/assets/images/team',
-    express.static(path.join(__dirname, 'assets/images/team'))
-);
+    express.static(path.join(process.cwd(), 'src/assets/images/team'))
+  );
 app.use(cookieParser());
 app.use(cors({
     origin: isProduction
