@@ -13,6 +13,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const isProduction = process.env.NODE_ENV === 'production';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -21,14 +22,6 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 const clients = new Set();
-
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, 'dist')));
-
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-    });
-  }
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -47,11 +40,22 @@ app.use(
 );
 app.use(cookieParser());
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: isProduction
+        ? ['https://shutterverse.onrender.com']
+        : 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
+
+if (isProduction) {
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    app.use(express.static(path.join(__dirname, '../../dist')));
+
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(__dirname, '../../dist/index.html'));
+    });
+  }
 
 const client = new MongoClient(process.env.DB_CONNECTION, {
     serverApi: {
