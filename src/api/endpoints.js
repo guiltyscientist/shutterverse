@@ -30,18 +30,6 @@ const clients = new Set();
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(
-    '/assets/images/news',
-    express.static(path.join(process.cwd(), 'src/assets/images/news'))
-);
-app.use(
-    '/assets/images/studios',
-    express.static(path.join(process.cwd(), 'src/assets/images/studios'))
-);
-app.use(
-    '/assets/images/team',
-    express.static(path.join(process.cwd(), 'src/assets/images/team'))
-  );
 app.use(cookieParser());
 app.use(cors({
     origin: isProduction
@@ -627,5 +615,18 @@ app.delete('/api/team-members/:id', async (req, res) => {
         res.status(500).json({ error: 'Database error' });
     }
 });
+
+app.use(
+    '/assets/images/news',
+    express.static(path.join(process.cwd(), 'src/assets/images/news'))
+);
+app.use(
+    '/assets/images/studios',
+    express.static(path.join(process.cwd(), 'src/assets/images/studios'))
+);
+app.use(
+    '/assets/images/team',
+    express.static(path.join(process.cwd(), 'src/assets/images/team'))
+);
 
 export default app;
