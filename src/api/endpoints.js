@@ -106,7 +106,7 @@ function broadcastNewsUpdate(type, data) {
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const dir = path.join(__dirname, 'src/assets/images/news');
+        const dir = path.join(process.cwd(), 'src/assets/images/news');
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
         }
@@ -121,7 +121,7 @@ const storage = multer.diskStorage({
 
 const studioStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const dir = path.join(__dirname, 'src/assets/images/studios');
+        const dir = path.join(process.cwd(), 'src/assets/images/studios');
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
         }
@@ -136,7 +136,7 @@ const studioStorage = multer.diskStorage({
 
 const teamStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const dir = path.join(__dirname, 'src/assets/images/team');
+        const dir = path.join(process.cwd(), 'src/assets/images/team');
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
         }
@@ -604,15 +604,15 @@ app.delete('/api/team-members/:id', async (req, res) => {
 
 app.use(
     '/assets/images/news',
-    express.static(path.join(__dirname, 'src/assets/images/news'))
+    express.static(path.join(process.cwd(), 'src/assets/images/news'))
 );
 app.use(
     '/assets/images/studios',
-    express.static(path.join(__dirname, 'src/assets/images/studios'))
+    express.static(path.join(process.cwd(), 'src/assets/images/studios'))
 );
 app.use(
     '/assets/images/team',
-    express.static(path.join(__dirname, 'src/assets/images/team'))
+    express.static(path.join(process.cwd(), 'src/assets/images/team'))
 );
 
 
@@ -627,7 +627,7 @@ process.on('uncaughtException', (err) => {
 });
 
 if (isProduction) {
-    const distPath = path.join(__dirname, 'dist');
+    const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
 
     app.get(/.*/, (req, res) => {
