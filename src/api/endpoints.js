@@ -47,13 +47,27 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
+
+process.on('unhandledRejection', (err) => {
+    console.error('Unhandled Promise Rejection:', err);
+    process.exit(1);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    process.exit(1);
+});
 
 if (isProduction) {
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    app.use(express.static(path.join(__dirname, '../../dist')));
+    const distPath = path.join(process.cwd(), 'dist');
+    app.use(express.static(distPath));
 
     app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, '../../dist/index.html'));
+        res.sendFile(path.join(distPath, 'index.html'));
     });
   }
 
@@ -90,9 +104,12 @@ wss.on('connection', (ws) => {
 });
 
 connectDB().then(() => {
-    server.listen(process.env.PORT, '0.0.0.0', () => {
+    server.listen(process.env.PORT || 3000, '0.0.0.0', () => {
         console.log(`Server running on port ${process.env.PORT || 3000} (HTTP & WebSocket)`);
     });
+}).catch(err => {
+    console.error('Failed to connect to DB:', err);
+    process.exit(1);
 });
 
 function broadcastNewsUpdate(type, data) {
