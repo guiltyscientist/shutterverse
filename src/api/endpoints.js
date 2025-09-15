@@ -44,25 +44,6 @@ app.use((err, req, res, next) => {
     res.status(500).send('Something broke!');
 });
 
-process.on('unhandledRejection', (err) => {
-    console.error('Unhandled Promise Rejection:', err);
-    process.exit(1);
-});
-
-process.on('uncaughtException', (err) => {
-    console.error('Uncaught Exception:', err);
-    process.exit(1);
-});
-
-if (isProduction) {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(distPath, 'index.html'));
-    });
-  }
-
 const client = new MongoClient(process.env.DB_CONNECTION, {
     serverApi: {
         version: ServerApiVersion.v1,
@@ -628,5 +609,26 @@ app.use(
     '/assets/images/team',
     express.static(path.join(process.cwd(), 'src/assets/images/team'))
 );
+
+
+process.on('unhandledRejection', (err) => {
+    console.error('Unhandled Promise Rejection:', err);
+    process.exit(1);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+    process.exit(1);
+});
+
+if (isProduction) {
+    const distPath = path.join(process.cwd(), 'dist');
+    app.use(express.static(distPath));
+
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(distPath, 'index.html'));
+    });
+}
+
 
 export default app;
