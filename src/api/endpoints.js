@@ -13,6 +13,10 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+console.log('Starting server with NODE_ENV:', process.env.NODE_ENV);
+console.log('Using PORT:', process.env.PORT);
+console.log('DB connection string:', process.env.DB_CONNECTION ? 'Set' : 'Not set');
+
 const isProduction = process.env.NODE_ENV === 'production';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
