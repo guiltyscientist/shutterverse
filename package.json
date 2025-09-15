@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "node src/api/endpoints.js",
-    "install-deps": "npm install && npm run build"
+    "install-deps": "npm install"
   },
   "dependencies": {
     "@heroicons/vue": "^2.0.18",
