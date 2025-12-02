@@ -112,7 +112,8 @@ export default {
             ? studio.details.features.split(",").map((f) => f.trim())
             : [],
           tidycalPath: studio.booking,
-          imageUrl: `https://shutterverse.onrender.com/${studio.image}`,
+          // Use the image directly (it's now a Cloudinary URL)
+          imageUrl: studio.image || "",
         }));
       } catch (err) {
         this.error = err.message;

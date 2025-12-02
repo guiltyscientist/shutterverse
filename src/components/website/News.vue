@@ -182,9 +182,14 @@ export default {
       this.windowWidth = window.innerWidth;
     },
     getImageUrl(path) {
-      if (path.startsWith("http")) {
+      if (!path) return "";
+      
+      // If it's already a full URL (Cloudinary URL), use it directly
+      if (path.startsWith("http") || path.startsWith("data:")) {
         return path;
       }
+      
+      // For backward compatibility with any remaining local paths
       return `${this.backendBaseUrl}/${path}`;
     },
     showNewNews() {

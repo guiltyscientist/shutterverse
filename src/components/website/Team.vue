@@ -27,7 +27,7 @@
             <div class="circle-image">
               <template v-if="member.imageUrl">
                 <img
-                  :src="'https://shutterverse.onrender.com/' + member.imageUrl"
+                  :src="member.imageUrl"
                   :alt="member.name"
                 />
               </template>
@@ -55,7 +55,7 @@
               >
                 <img
                   v-if="social.icon"
-                  :src="social.icon"
+                  :src="getSocialIconUrl(social.icon)"
                   :alt="social.platform + ' icon'"
                   class="social-icon"
                 />
@@ -102,20 +102,15 @@ export default {
           if (member.SocialMedia) {
             for (const [platform, link] of Object.entries(member.SocialMedia)) {
               const iconMap = {
-                Instagram:
-                  "src/api/assets/icons/social-medias/Instagram_icon.png",
-                Twitter: "src/api/assets/icons/social-medias/Twitter_icon.png",
-                Facebook:
-                  "src/api/assets/icons/social-medias/Facebook_icon.png",
-                LinkedIn:
-                  "src/api/assets/icons/social-medias/LinkedIn_icon.png",
-                Vimeo: "src/api/assets/icons/social-medias/Vimeo_icon.png",
-                YouTube: "src/api/assets/icons/social-medias/YouTube_icon.png",
-                SoundCloud:
-                  "src/api/assets/icons/social-medias/SoundCloud_icon.png",
-                Pinterest:
-                  "src/api/assets/icons/social-medias/Pinterest_icon.png",
-                Behance: "src/api/assets/icons/social-medias/Behance_icon.png",
+                Instagram: "icons/social-medias/Instagram_icon.png",
+                Twitter: "icons/social-medias/Twitter_icon.png",
+                Facebook: "icons/social-medias/Facebook_icon.png",
+                LinkedIn: "icons/social-medias/LinkedIn_icon.png",
+                Vimeo: "icons/social-medias/Vimeo_icon.png",
+                YouTube: "icons/social-medias/YouTube_icon.png",
+                SoundCloud: "icons/social-medias/SoundCloud_icon.png",
+                Pinterest: "icons/social-medias/Pinterest_icon.png",
+                Behance: "icons/social-medias/Behance_icon.png",
               };
 
               if (iconMap[platform]) {
@@ -133,7 +128,8 @@ export default {
             name: member.Name,
             role: member.Occupation,
             description: member.Description,
-            imageUrl: member.Image,
+            // Use the Image field directly - it's now a Cloudinary URL
+            imageUrl: member.Image || "",
             initials: initials,
             social: social,
           };
@@ -144,6 +140,15 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+
+    getSocialIconUrl(iconPath) {
+      // If it's already a full URL, use it directly
+      if (iconPath.startsWith('http') || iconPath.startsWith('data:')) {
+        return iconPath;
+      }
+      // Otherwise, assume it's a relative path from the public folder
+      return iconPath.startsWith('/') ? iconPath : `/${iconPath}`;
     },
 
     getInitials(name) {
