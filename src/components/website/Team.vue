@@ -102,10 +102,23 @@ export default {
             for (const [platform, link] of Object.entries(member.SocialMedia)) {
               const iconMap = {
                 Instagram: "https://cdn.simpleicons.org/instagram/74BCBF",
-                Twitter: "https://cdn.simpleicons.org/twitter/74BCBF",
+                Twitter: "https://cdn.simpleicons.org/X/74BCBF",
                 Facebook: "https://cdn.simpleicons.org/facebook/74BCBF",
                 LinkedIn: "https://cdn.simpleicons.org/linkedin/74BCBF",
                 YouTube: "https://cdn.simpleicons.org/youtube/74BCBF",
+                Vimeo: "https://cdn.simpleicons.org/vimeo/74BCBF",
+                SoundCloud: "https://cdn.simpleicons.org/soundcloud/74BCBF",
+                Pinterest: "https://cdn.simpleicons.org/pinterest/74BCBF",
+                Behance: "https://cdn.simpleicons.org/behance/74BCBF",
+                Website: "https://cdn.simpleicons.org/globe/74BCBF",
+                TikTok: "https://cdn.simpleicons.org/tiktok/74BCBF",
+                Snapchat: "https://cdn.simpleicons.org/snapchat/74BCBF",
+                Twitch: "https://cdn.simpleicons.org/twitch/74BCBF",
+                Discord: "https://cdn.simpleicons.org/discord/74BCBF",
+                Reddit: "https://cdn.simpleicons.org/reddit/74BCBF",
+                Spotify: "https://cdn.simpleicons.org/spotify/74BCBF",
+                Apple: "https://cdn.simpleicons.org/apple/74BCBF",
+                Google: "https://cdn.simpleicons.org/google/74BCBF",
               };
 
               if (iconMap[platform]) {
