@@ -297,7 +297,7 @@ export default {
       loading.value = true;
       error.value = null;
       try {
-        const response = await fetch("http://localhost:3000/api/team-members");
+        const response = await fetch("https://shutterverse.onrender.com/api/team-members");
         if (!response.ok) throw new Error("Failed to fetch team members");
         const data = await response.json();
         teamMembers.value = data.teamMembers;
@@ -333,7 +333,7 @@ export default {
       }
     };
 
-    const BACKEND_BASE_URL = "http://localhost:3000";
+    const BACKEND_BASE_URL = "https://shutterverse.onrender.com";
     const getImageUrl = (image) => {
       if (!image) return "";
       if (image.startsWith("data:") || image.startsWith("http")) {
@@ -409,7 +409,7 @@ export default {
 
           try {
             const uploadResponse = await fetch(
-              "http://localhost:3000/api/upload/team",
+              "https://shutterverse.onrender.com/api/upload/team",
               {
                 method: "POST",
                 body: formData,
@@ -435,8 +435,8 @@ export default {
         };
 
         const url = isEditing.value
-          ? `http://localhost:3000/api/team-members/${currentMember.value._id}`
-          : "http://localhost:3000/api/team-members";
+          ? `https://shutterverse.onrender.com/api/team-members/${currentMember.value._id}`
+          : "https://shutterverse.onrender.com/api/team-members";
 
         const method = isEditing.value ? "PUT" : "POST";
 
@@ -469,7 +469,7 @@ export default {
     const deleteMember = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/team-members/${deleteId.value}`,
+          `https://shutterverse.onrender.com/api/team-members/${deleteId.value}`,
           {
             method: "DELETE",
           }

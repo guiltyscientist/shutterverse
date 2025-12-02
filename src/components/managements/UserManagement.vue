@@ -201,7 +201,7 @@ export default {
       this.isLoading = true;
       this.errorMessage = "";
       try {
-        const response = await fetch("http://localhost:3000/api/users");
+        const response = await fetch("https://shutterverse.onrender.com/api/users");
         const contentType = response.headers.get("content-type");
         let data;
 
@@ -239,7 +239,7 @@ export default {
       this.isLoading = true;
       this.errorMessage = "";
       try {
-        const response = await fetch("http://localhost:3000/api/users", {
+        const response = await fetch("https://shutterverse.onrender.com/api/users", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -281,7 +281,7 @@ export default {
       this.errorMessage = "";
       try {
         const response = await fetch(
-          `http://localhost:3000/api/users/${user._id}/reset-password`,
+          `https://shutterverse.onrender.com/api/users/${user._id}/reset-password`,
           {
             method: "PUT",
           }
@@ -307,7 +307,7 @@ export default {
         user.role = newRole;
 
         const response = await fetch(
-          `http://localhost:3000/api/users/${user._id}/toggle-admin`,
+          `https://shutterverse.onrender.com/api/users/${user._id}/toggle-admin`,
           {
             method: "PUT",
           }
@@ -339,7 +339,7 @@ export default {
       this.errorMessage = "";
       try {
         const response = await fetch(
-          `http://localhost:3000/api/users/${user._id}`,
+          `https://shutterverse.onrender.com/api/users/${user._id}`,
           {
             method: "DELETE",
           }

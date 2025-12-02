@@ -90,7 +90,7 @@ export default {
       newNewsAvailable: false,
       currentPage: 0,
       pageSize: 3,
-      backendBaseUrl: "http://localhost:3000",
+      backendBaseUrl: "https://shutterverse.onrender.com",
       windowWidth: window.innerWidth,
       mobileItemsToShow: 3,
     };

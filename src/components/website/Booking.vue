@@ -98,7 +98,7 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const response = await fetch("http://localhost:3000/api/studios");
+        const response = await fetch("https://shutterverse.onrender.com/api/studios");
         if (!response.ok) throw new Error("Failed to fetch studios");
         const data = await response.json();
 
@@ -112,7 +112,7 @@ export default {
             ? studio.details.features.split(",").map((f) => f.trim())
             : [],
           tidycalPath: studio.booking,
-          imageUrl: `http://localhost:3000/${studio.image}`,
+          imageUrl: `https://shutterverse.onrender.com/${studio.image}`,
         }));
       } catch (err) {
         this.error = err.message;

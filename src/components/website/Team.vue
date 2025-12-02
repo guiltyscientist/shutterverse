@@ -27,7 +27,7 @@
             <div class="circle-image">
               <template v-if="member.imageUrl">
                 <img
-                  :src="'http://localhost:3000/' + member.imageUrl"
+                  :src="'https://shutterverse.onrender.com' + member.imageUrl"
                   :alt="member.name"
                 />
               </template>
@@ -87,7 +87,7 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const response = await fetch("http://localhost:3000/api/team-members");
+        const response = await fetch("https://shutterverse.onrender.com/api/team-members");
         if (!response.ok) throw new Error("Failed to fetch team members");
         const data = await response.json();
 

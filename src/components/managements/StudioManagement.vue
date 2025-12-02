@@ -229,7 +229,7 @@ export default {
       loading.value = true;
       error.value = null;
       try {
-        const response = await fetch("http://localhost:3000/api/studios");
+        const response = await fetch("https://shutterverse.onrender.com/api/studios");
         if (!response.ok) throw new Error("Failed to fetch studios");
         const data = await response.json();
         studios.value = data.studios;
@@ -265,7 +265,7 @@ export default {
       }
     };
 
-    const BACKEND_BASE_URL = "http://localhost:3000";
+    const BACKEND_BASE_URL = "https://shutterverse.onrender.com";
     const getImageUrl = (image) => {
       if (!image) return "";
       if (image.startsWith("data:") || image.startsWith("http")) {
@@ -325,7 +325,7 @@ export default {
 
           try {
             const uploadResponse = await fetch(
-              "http://localhost:3000/api/upload",
+              "https://shutterverse.onrender.com/api/upload",
               {
                 method: "POST",
                 body: formData,
@@ -353,8 +353,8 @@ export default {
         };
 
         const url = isEditing.value
-          ? `http://localhost:3000/api/studios/${currentStudio.value.id}`
-          : "http://localhost:3000/api/studios";
+          ? `https://shutterverse.onrender.com/api/studios/${currentStudio.value.id}`
+          : "https://shutterverse.onrender.com/api/studios";
 
         const method = isEditing.value ? "PUT" : "POST";
 
@@ -387,7 +387,7 @@ export default {
     const deleteStudio = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3000/api/studios/${deleteId.value}`,
+          `https://shutterverse.onrender.com/api/studios/${deleteId.value}`,
           {
             method: "DELETE",
           }

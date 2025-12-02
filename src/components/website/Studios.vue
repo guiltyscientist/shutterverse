@@ -9,7 +9,7 @@
           class="studio-item"
         >
           <img
-            :src="'http://localhost:3000/' + studio.image"
+            :src="'https://shutterverse.onrender.com' + studio.image"
             :alt="studio.title"
             class="studio-image"
           />
@@ -30,7 +30,7 @@
       >
         <div class="studio-image-container">
           <img
-            :src="'http://localhost:3000/' + studio.image"
+            :src="'https://shutterverse.onrender.com' + studio.image"
             :alt="studio.details.name"
             class="studio-image"
           />
@@ -67,7 +67,7 @@ export default {
   },
   async mounted() {
     try {
-      const response = await fetch("http://localhost:3000/api/studios");
+      const response = await fetch("https://shutterverse.onrender.com/api/studios");
       const data = await response.json();
       this.studios = data.studios;
     } catch (error) {

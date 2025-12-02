@@ -60,11 +60,11 @@ export default {
       this.opacity = 0.3 + 0.7 * visibleRatio;
     },
     fetchStudios() {
-      fetch("http://localhost:3000/api/studios")
+      fetch("https://shutterverse.onrender.com/api/studios")
         .then((response) => response.json())
         .then((data) => {
           this.images = data.studios.map(
-            (studio) => `http://localhost:3000/${studio.image}`
+            (studio) => `https://shutterverse.onrender.com/${studio.image}`
           );
         })
         .catch((error) => {
