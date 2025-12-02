@@ -63,8 +63,9 @@ export default {
       fetch("https://shutterverse.onrender.com/api/studios")
         .then((response) => response.json())
         .then((data) => {
+          // Cloudinary URLs are already full URLs, use directly
           this.images = data.studios.map(
-            (studio) => `https://shutterverse.onrender.com/${studio.image}`
+            (studio) => studio.image // Direct Cloudinary URL
           );
         })
         .catch((error) => {

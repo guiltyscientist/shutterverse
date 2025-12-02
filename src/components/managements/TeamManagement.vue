@@ -269,15 +269,16 @@ export default {
     const showModal = ref(false);
     const showDeleteModal = ref(false);
     const isEditing = ref(false);
-    const currentMember = ref({
-      teamNo: "",
-      Name: "",
-      Occupation: "",
-      Description: "",
-      Image: "",
-      SocialMedia: {},
-      imageFile: null,
-    });
+const currentMember = ref({
+  teamNo: "",
+  Name: "",
+  Occupation: "",
+  Description: "",
+  Image: "",
+  SocialMedia: {},
+  publicId: null, // Add this
+  imageFile: null,
+});
     const socialMediaLinks = ref([]);
     const imagePreview = ref(null);
     const deleteId = ref(null);
@@ -297,7 +298,9 @@ export default {
       loading.value = true;
       error.value = null;
       try {
-        const response = await fetch("https://shutterverse.onrender.com/api/team-members");
+        const response = await fetch(
+          "https://shutterverse.onrender.com/api/team-members"
+        );
         if (!response.ok) throw new Error("Failed to fetch team members");
         const data = await response.json();
         teamMembers.value = data.teamMembers;
@@ -333,13 +336,14 @@ export default {
       }
     };
 
-    const BACKEND_BASE_URL = "https://shutterverse.onrender.com";
     const getImageUrl = (image) => {
       if (!image) return "";
-      if (image.startsWith("data:") || image.startsWith("http")) {
+      // If it's already a full URL (from Cloudinary) or data URL, use it directly
+      if (image.startsWith("http") || image.startsWith("data:")) {
         return image;
       }
-      return `${BACKEND_BASE_URL}/${image}`;
+      // Fallback for any remaining local paths (during migration)
+      return `https://shutterverse.onrender.com/${image}`;
     };
 
     const openCreateModal = () => {
@@ -392,69 +396,72 @@ export default {
       socialMediaLinks.value.splice(index, 1);
     };
 
-    const submitForm = async () => {
-      try {
-        const socialMedia = {};
-        socialMediaLinks.value.forEach((link) => {
-          if (link.platform && link.url) {
-            socialMedia[link.platform] = link.url;
-          }
-        });
-
-        let newImagePath = currentMember.value.Image;
-
-        if (currentMember.value.imageFile) {
-          const formData = new FormData();
-          formData.append("image", currentMember.value.imageFile);
-
-          try {
-            const uploadResponse = await fetch(
-              "https://shutterverse.onrender.com/api/upload/team",
-              {
-                method: "POST",
-                body: formData,
-              }
-            );
-
-            if (!uploadResponse.ok) throw new Error("Upload failed");
-            const uploadData = await uploadResponse.json();
-            newImagePath = uploadData.imagePath;
-          } catch (uploadErr) {
-            console.error("Upload error details:", uploadErr);
-            throw new Error("Failed to upload image");
-          }
-        }
-
-        const memberData = {
-          teamNo: currentMember.value.teamNo,
-          Name: currentMember.value.Name,
-          Occupation: currentMember.value.Occupation,
-          Description: currentMember.value.Description,
-          Image: newImagePath,
-          SocialMedia: socialMedia,
-        };
-
-        const url = isEditing.value
-          ? `https://shutterverse.onrender.com/api/team-members/${currentMember.value._id}`
-          : "https://shutterverse.onrender.com/api/team-members";
-
-        const method = isEditing.value ? "PUT" : "POST";
-
-        const response = await fetch(url, {
-          method,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(memberData),
-        });
-
-        if (!response.ok) throw new Error("Failed to save team member");
-
-        fetchTeamMembers();
-        closeModal();
-      } catch (err) {
-        error.value = err.message;
-        console.error("Error saving team member:", err);
+const submitForm = async () => {
+  try {
+    const socialMedia = {};
+    socialMediaLinks.value.forEach((link) => {
+      if (link.platform && link.url) {
+        socialMedia[link.platform] = link.url;
       }
+    });
+
+    let newImagePath = currentMember.value.Image;
+    let newPublicId = currentMember.value.publicId || null;
+
+    if (currentMember.value.imageFile) {
+      const formData = new FormData();
+      formData.append("image", currentMember.value.imageFile);
+
+      try {
+        const uploadResponse = await fetch(
+          "https://shutterverse.onrender.com/api/upload/team",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        if (!uploadResponse.ok) throw new Error("Upload failed");
+        const uploadData = await uploadResponse.json();
+        newImagePath = uploadData.imagePath; // Cloudinary URL
+        newPublicId = uploadData.publicId; // Cloudinary public_id
+      } catch (uploadErr) {
+        console.error("Upload error details:", uploadErr);
+        throw new Error("Failed to upload image");
+      }
+    }
+
+    const memberData = {
+      teamNo: currentMember.value.teamNo,
+      Name: currentMember.value.Name,
+      Occupation: currentMember.value.Occupation,
+      Description: currentMember.value.Description,
+      Image: newImagePath,
+      SocialMedia: socialMedia,
+      publicId: newPublicId, // Include publicId for backend
     };
+
+    const url = isEditing.value
+      ? `https://shutterverse.onrender.com/api/team-members/${currentMember.value._id}`
+      : "https://shutterverse.onrender.com/api/team-members";
+
+    const method = isEditing.value ? "PUT" : "POST";
+
+    const response = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(memberData),
+    });
+
+    if (!response.ok) throw new Error("Failed to save team member");
+
+    fetchTeamMembers();
+    closeModal();
+  } catch (err) {
+    error.value = err.message;
+    console.error("Error saving team member:", err);
+  }
+};
 
     const confirmDelete = (id) => {
       deleteId.value = id;

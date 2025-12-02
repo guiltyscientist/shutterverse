@@ -221,15 +221,16 @@ export default {
     const showModal = ref(false);
     const showDeleteModal = ref(false);
     const isEditing = ref(false);
-    const currentNews = ref({
-      day: "",
-      month: "",
-      year: new Date().getFullYear.toString(),
-      title: "",
-      text: "",
-      image: "",
-      imageFile: null,
-    });
+const currentNews = ref({
+  day: "",
+  month: "",
+  year: new Date().getFullYear().toString(),
+  title: "",
+  text: "",
+  image: "",
+  publicId: null, // Add this
+  imageFile: null,
+});
     const imagePreview = ref(null);
     const deleteId = ref(null);
     const months = [
@@ -299,14 +300,15 @@ export default {
       }
     };
 
-    const BACKEND_BASE_URL = "https://shutterverse.onrender.com";
-    const getImageUrl = (image) => {
-      if (!image) return "";
-      if (image.startsWith("data:") || image.startsWith("http")) {
-        return image;
-      }
-      return `${BACKEND_BASE_URL}/${image}`;
-    };
+const getImageUrl = (image) => {
+  if (!image) return "";
+  // If it's already a full URL (from Cloudinary) or data URL, use it directly
+  if (image.startsWith("http") || image.startsWith("data:")) {
+    return image;
+  }
+  // Fallback for any remaining local paths (during migration)
+  return `https://shutterverse.onrender.com/${image}`;
+};
 
     const openCreateModal = () => {
       currentNews.value = {
@@ -341,62 +343,66 @@ export default {
       }
     };
 
-    const submitForm = async () => {
+const submitForm = async () => {
+  try {
+    let newImagePath = currentNews.value.image;
+    let newPublicId = currentNews.value.publicId || null;
+
+    // Upload new image if there's a file
+    if (currentNews.value.imageFile) {
+      const formData = new FormData();
+      formData.append("image", currentNews.value.imageFile);
+
       try {
-        let newImagePath = currentNews.value.image;
-
-        if (currentNews.value.imageFile) {
-          const formData = new FormData();
-          formData.append("image", currentNews.value.imageFile);
-
-          try {
-            const uploadResponse = await fetch(
-              "https://shutterverse.onrender.com/api/upload",
-              {
-                method: "POST",
-                body: formData,
-              }
-            );
-
-            if (!uploadResponse.ok) throw new Error("Upload failed");
-            const uploadData = await uploadResponse.json();
-            newImagePath = uploadData.imagePath;
-          } catch (uploadErr) {
-            console.error("Upload error details:", uploadErr);
-            throw new Error("Failed to upload image");
+        const uploadResponse = await fetch(
+          "https://shutterverse.onrender.com/api/upload",
+          {
+            method: "POST",
+            body: formData,
           }
-        }
+        );
 
-        const newsData = {
-          day: currentNews.value.day,
-          month: currentNews.value.month,
-          year: currentNews.value.year,
-          title: currentNews.value.title,
-          text: currentNews.value.text,
-          image: newImagePath,
-        };
-
-        const url = isEditing.value
-          ? `https://shutterverse.onrender.com/api/news/${currentNews.value.id}`
-          : "https://shutterverse.onrender.com/api/news";
-
-        const method = isEditing.value ? "PUT" : "POST";
-
-        const response = await fetch(url, {
-          method,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newsData),
-        });
-
-        if (!response.ok) throw new Error("Failed to save news");
-
-        fetchNews();
-        closeModal();
-      } catch (err) {
-        error.value = err.message;
-        console.error("Error saving news:", err);
+        if (!uploadResponse.ok) throw new Error("Upload failed");
+        const uploadData = await uploadResponse.json();
+        newImagePath = uploadData.imagePath; // Cloudinary URL
+        newPublicId = uploadData.publicId; // Cloudinary public_id
+      } catch (uploadErr) {
+        console.error("Upload error details:", uploadErr);
+        throw new Error("Failed to upload image");
       }
+    }
+
+    const newsData = {
+      day: currentNews.value.day,
+      month: currentNews.value.month,
+      year: currentNews.value.year,
+      title: currentNews.value.title,
+      text: currentNews.value.text,
+      image: newImagePath,
+      publicId: newPublicId, // Include publicId for backend
     };
+
+    const url = isEditing.value
+      ? `https://shutterverse.onrender.com/api/news/${currentNews.value.id}`
+      : "https://shutterverse.onrender.com/api/news";
+
+    const method = isEditing.value ? "PUT" : "POST";
+
+    const response = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newsData),
+    });
+
+    if (!response.ok) throw new Error("Failed to save news");
+
+    fetchNews();
+    closeModal();
+  } catch (err) {
+    error.value = err.message;
+    console.error("Error saving news:", err);
+  }
+};
 
     const confirmDelete = (id) => {
       deleteId.value = id;

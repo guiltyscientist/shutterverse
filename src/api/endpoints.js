@@ -10,6 +10,8 @@ import { WebSocketServer } from 'ws';
 import { fileURLToPath } from 'url';
 import { MongoClient, ServerApiVersion, ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
+import cloudinary from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
 dotenv.config();
 
@@ -26,6 +28,68 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 const clients = new Set();
+
+// Configure Cloudinary
+cloudinary.v2.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true
+});
+
+console.log('Cloudinary configured with cloud name:', process.env.CLOUDINARY_CLOUD_NAME ? 'Set' : 'Not set');
+
+// Cloudinary storage configuration
+const createCloudinaryStorage = (folderName) => {
+    return new CloudinaryStorage({
+        cloudinary: cloudinary.v2,
+        params: {
+            folder: `shutterverse/${folderName}`,
+            allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+            transformation: [{ width: 1200, height: 800, crop: 'limit' }],
+            resource_type: 'image'
+        }
+    });
+};
+
+// Create upload middlewares for different types
+const upload = multer({ storage: createCloudinaryStorage('news') });
+const studioUpload = multer({ storage: createCloudinaryStorage('studios') });
+const teamUpload = multer({ storage: createCloudinaryStorage('team') });
+
+// Helper function to delete images from Cloudinary
+const deleteCloudinaryImage = async (publicId) => {
+    try {
+        if (!publicId) return null;
+        const result = await cloudinary.v2.uploader.destroy(publicId);
+        console.log('Deleted image from Cloudinary:', publicId, result);
+        return result;
+    } catch (error) {
+        console.error('Error deleting image from Cloudinary:', error);
+        return null;
+    }
+};
+
+// Helper function to extract public_id from Cloudinary URL
+const extractPublicId = (url) => {
+    if (!url || !url.includes('cloudinary.com')) return null;
+
+    try {
+        // Extract public_id from Cloudinary URL
+        // Example: https://res.cloudinary.com/demo/image/upload/v1234567/shutterverse/news/filename.jpg
+        const parts = url.split('/');
+        const uploadIndex = parts.indexOf('upload');
+        if (uploadIndex !== -1) {
+            // Get everything after 'upload' (excluding version if present)
+            const pathAfterUpload = parts.slice(uploadIndex + 1).join('/');
+            // Remove file extension
+            return pathAfterUpload.replace(/\.[^/.]+$/, "");
+        }
+    } catch (error) {
+        console.error('Error extracting public_id from URL:', url, error);
+    }
+    return null;
+};
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -104,82 +168,43 @@ function broadcastNewsUpdate(type, data) {
     });
 }
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = path.join(process.cwd(), 'src/assets/images/news');
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        const ext = path.extname(file.originalname);
-        cb(null, uniqueSuffix + ext);
-    }
-});
-
-const studioStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = path.join(process.cwd(), 'src/assets/images/studios');
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        const ext = path.extname(file.originalname);
-        cb(null, uniqueSuffix + ext);
-    }
-});
-
-const teamStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = path.join(process.cwd(), 'src/assets/images/team');
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        const ext = path.extname(file.originalname);
-        cb(null, uniqueSuffix + ext);
-    }
-});
-
-const upload = multer({ storage });
-const studioUpload = multer({ storage: studioStorage });
-const teamUpload = multer({ storage: teamStorage });
-
 app.use((req, res, next) => {
     console.log(`Incoming request: ${req.method} ${req.path}`);
     next();
 });
 
+// Upload endpoints - now using Cloudinary
 app.post('/api/upload', upload.single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
     }
-    const relativePath = `assets/images/news/${req.file.filename}`;
-    res.json({ imagePath: relativePath });
+    console.log('Uploaded to Cloudinary:', req.file.path);
+    res.json({
+        imagePath: req.file.path, // Cloudinary URL
+        publicId: req.file.filename // Cloudinary public_id
+    });
 });
 
 app.post('/api/upload/studio', studioUpload.single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
     }
-    const relativePath = `assets/images/studios/${req.file.filename}`;
-    res.json({ imagePath: relativePath });
+    console.log('Uploaded studio image to Cloudinary:', req.file.path);
+    res.json({
+        imagePath: req.file.path,
+        publicId: req.file.filename
+    });
 });
 
 app.post('/api/upload/team', teamUpload.single('image'), (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
     }
-    const relativePath = `assets/images/team/${req.file.filename}`;
-    res.json({ imagePath: relativePath });
+    console.log('Uploaded team image to Cloudinary:', req.file.path);
+    res.json({
+        imagePath: req.file.path,
+        publicId: req.file.filename
+    });
 });
 
 app.get('/api/news', async (req, res) => {
@@ -202,7 +227,7 @@ app.get('/api/news/:id', async (req, res) => {
 });
 
 app.post('/api/news', async (req, res) => {
-    const { day, month, title, text, image, year } = req.body;
+    const { day, month, title, text, image, year, publicId } = req.body;
     if (!day || !month || !title || !text || !year) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -218,6 +243,7 @@ app.post('/api/news', async (req, res) => {
             title,
             text,
             image: image || null,
+            publicId: publicId || null, // Store Cloudinary public_id
             year
         };
         await newsCollection.insertOne(newItem);
@@ -230,22 +256,36 @@ app.post('/api/news', async (req, res) => {
 
 app.put('/api/news/:id', async (req, res) => {
     const id = parseInt(req.params.id);
-    const { day, month, title, text, image, year } = req.body;
+    const { day, month, title, text, image, year, publicId } = req.body;
 
     if (!day || !month || !title || !text || !year) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
 
     try {
+        // Get existing news item to check for old image
+        const existingNews = await newsCollection.findOne({ id });
+        if (!existingNews) {
+            return res.status(404).json({ error: 'News item not found' });
+        }
+
+        // Delete old image from Cloudinary if new image is provided
+        if (image && existingNews.image && existingNews.image !== image) {
+            const oldPublicId = existingNews.publicId || extractPublicId(existingNews.image);
+            if (oldPublicId) {
+                await deleteCloudinaryImage(oldPublicId);
+            }
+        }
+
         const result = await newsCollection.updateOne(
             { id },
-            { $set: { day, month, title, text, image, year } }
+            { $set: { day, month, title, text, image, publicId, year } }
         );
 
         if (result.matchedCount === 0) {
             return res.status(404).json({ error: 'News item not found' });
         }
-        broadcastNewsUpdate('update', { id, day, month, title, text, image, year });
+        broadcastNewsUpdate('update', { id, day, month, title, text, image, publicId, year });
         res.json({ id, day, month, title, text, year });
     } catch (err) {
         res.status(500).json({ error: 'Database error' });
@@ -254,6 +294,20 @@ app.put('/api/news/:id', async (req, res) => {
 
 app.delete('/api/news/:id', async (req, res) => {
     try {
+        // Get the news item first
+        const newsItem = await newsCollection.findOne({ id: parseInt(req.params.id) });
+        if (!newsItem) {
+            return res.status(404).json({ error: 'News item not found' });
+        }
+
+        // Delete image from Cloudinary if it exists
+        if (newsItem.image) {
+            const publicId = newsItem.publicId || extractPublicId(newsItem.image);
+            if (publicId) {
+                await deleteCloudinaryImage(publicId);
+            }
+        }
+
         const result = await newsCollection.deleteOne({ id: parseInt(req.params.id) });
         if (result.deletedCount === 0) {
             return res.status(404).json({ error: 'News item not found' });
@@ -274,7 +328,6 @@ app.get('/api/studios', async (req, res) => {
     }
 });
 
-
 app.get('/api/studios/:id', async (req, res) => {
     try {
         const studio = await studioCollection.findOne({ id: req.params.id });
@@ -286,7 +339,7 @@ app.get('/api/studios/:id', async (req, res) => {
 });
 
 app.post('/api/studios', async (req, res) => {
-    const { image, title, details, booking } = req.body;
+    const { image, title, details, booking, publicId } = req.body;
 
     if (!image || !title || !details || !details.name || !details.description) {
         return res.status(400).json({
@@ -310,7 +363,8 @@ app.post('/api/studios', async (req, res) => {
                 name: details.name,
                 description: details.description,
                 features: details.features || null
-            }
+            },
+            publicId: publicId || null
         };
 
         await studioCollection.insertOne(newStudio);
@@ -321,7 +375,7 @@ app.post('/api/studios', async (req, res) => {
 });
 
 app.put('/api/studios/:id', async (req, res) => {
-    const { image, title, details, booking } = req.body;
+    const { image, title, details, booking, publicId } = req.body;
 
     if (!image || !title || !details || !details.name || !details.description) {
         return res.status(400).json({
@@ -330,6 +384,20 @@ app.put('/api/studios/:id', async (req, res) => {
     }
 
     try {
+        // Get existing studio to check for old image
+        const existingStudio = await studioCollection.findOne({ id: req.params.id });
+        if (!existingStudio) {
+            return res.status(404).json({ error: 'Studio not found' });
+        }
+
+        // Delete old image from Cloudinary if new image is provided
+        if (image && existingStudio.image && existingStudio.image !== image) {
+            const oldPublicId = existingStudio.publicId || extractPublicId(existingStudio.image);
+            if (oldPublicId) {
+                await deleteCloudinaryImage(oldPublicId);
+            }
+        }
+
         const result = await studioCollection.updateOne(
             { id: req.params.id },
             {
@@ -341,7 +409,8 @@ app.put('/api/studios/:id', async (req, res) => {
                         name: details.name,
                         description: details.description,
                         features: details.features || null
-                    }
+                    },
+                    publicId: publicId || null
                 }
             }
         );
@@ -359,6 +428,20 @@ app.put('/api/studios/:id', async (req, res) => {
 
 app.delete('/api/studios/:id', async (req, res) => {
     try {
+        // Get the studio first
+        const studio = await studioCollection.findOne({ id: req.params.id });
+        if (!studio) {
+            return res.status(404).json({ error: 'Studio not found' });
+        }
+
+        // Delete image from Cloudinary if it exists
+        if (studio.image) {
+            const publicId = studio.publicId || extractPublicId(studio.image);
+            if (publicId) {
+                await deleteCloudinaryImage(publicId);
+            }
+        }
+
         const result = await studioCollection.deleteOne({ id: req.params.id });
         if (result.deletedCount === 0) {
             return res.status(404).json({ error: 'Studio not found' });
@@ -524,7 +607,7 @@ app.get('/api/team-members/:id', async (req, res) => {
 });
 
 app.post('/api/team-members', async (req, res) => {
-    const { teamNo, Name, Occupation, Description, SocialMedia, Image } = req.body;
+    const { teamNo, Name, Occupation, Description, SocialMedia, Image, publicId } = req.body;
 
     if (!teamNo || !Name || !Occupation || !Description) {
         return res.status(400).json({
@@ -539,7 +622,8 @@ app.post('/api/team-members', async (req, res) => {
             Occupation,
             Description,
             SocialMedia: SocialMedia || {},
-            Image: Image || null
+            Image: Image || null,
+            publicId: publicId || null
         };
 
         const result = await teamCollection.insertOne(newMember);
@@ -551,7 +635,7 @@ app.post('/api/team-members', async (req, res) => {
 
 app.put('/api/team-members/:id', async (req, res) => {
     const id = req.params.id;
-    const { teamNo, Name, Occupation, Description, SocialMedia, Image } = req.body;
+    const { teamNo, Name, Occupation, Description, SocialMedia, Image, publicId } = req.body;
 
     if (!teamNo || !Name || !Occupation || !Description) {
         return res.status(400).json({
@@ -562,6 +646,20 @@ app.put('/api/team-members/:id', async (req, res) => {
     try {
         const objectId = new ObjectId(id);
 
+        // Get existing team member to check for old image
+        const existingMember = await teamCollection.findOne({ _id: objectId });
+        if (!existingMember) {
+            return res.status(404).json({ error: 'Team member not found' });
+        }
+
+        // Delete old image from Cloudinary if new image is provided
+        if (Image && existingMember.Image && existingMember.Image !== Image) {
+            const oldPublicId = existingMember.publicId || extractPublicId(existingMember.Image);
+            if (oldPublicId) {
+                await deleteCloudinaryImage(oldPublicId);
+            }
+        }
+
         const result = await teamCollection.updateOne(
             { _id: objectId },
             {
@@ -571,7 +669,8 @@ app.put('/api/team-members/:id', async (req, res) => {
                     Occupation,
                     Description,
                     SocialMedia: SocialMedia || {},
-                    Image: Image || null
+                    Image: Image || null,
+                    publicId: publicId || null
                 }
             }
         );
@@ -592,6 +691,20 @@ app.put('/api/team-members/:id', async (req, res) => {
 
 app.delete('/api/team-members/:id', async (req, res) => {
     try {
+        // Get the team member first
+        const teamMember = await teamCollection.findOne({ _id: new ObjectId(req.params.id) });
+        if (!teamMember) {
+            return res.status(404).json({ error: 'Team member not found' });
+        }
+
+        // Delete image from Cloudinary if it exists
+        if (teamMember.Image) {
+            const publicId = teamMember.publicId || extractPublicId(teamMember.Image);
+            if (publicId) {
+                await deleteCloudinaryImage(publicId);
+            }
+        }
+
         const result = await teamCollection.deleteOne({ _id: new ObjectId(req.params.id) });
         if (result.deletedCount === 0) {
             return res.status(404).json({ error: 'Team member not found' });
@@ -602,19 +715,11 @@ app.delete('/api/team-members/:id', async (req, res) => {
     }
 });
 
-app.use(
-    '/assets/images/news',
-    express.static(path.join(process.cwd(), 'src/assets/images/news'))
-);
-app.use(
-    '/assets/images/studios',
-    express.static(path.join(process.cwd(), 'src/assets/images/studios'))
-);
-app.use(
-    '/assets/images/team',
-    express.static(path.join(process.cwd(), 'src/assets/images/team'))
-);
-
+// REMOVED static file serving for local images since we're using Cloudinary
+// Remove these lines:
+// app.use('/assets/images/news', ...)
+// app.use('/assets/images/studios', ...)
+// app.use('/assets/images/team', ...)
 
 process.on('unhandledRejection', (err) => {
     console.error('Unhandled Promise Rejection:', err);
@@ -634,6 +739,5 @@ if (isProduction) {
         res.sendFile(path.join(distPath, 'index.html'));
     });
 }
-
 
 export default app;

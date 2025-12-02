@@ -212,16 +212,19 @@ export default {
     const showModal = ref(false);
     const showDeleteModal = ref(false);
     const isEditing = ref(false);
-    const currentStudio = ref({
-      id: "",
-      title: "",
-      image: "",
-      details: {
-        name: "",
-        description: "",
-      },
-      imageFile: null,
-    });
+const currentStudio = ref({
+  id: "",
+  title: "",
+  image: "",
+  booking: "",
+  details: {
+    name: "",
+    description: "",
+    features: "",
+  },
+  publicId: null, // Add this
+  imageFile: null,
+});
     const imagePreview = ref(null);
     const deleteId = ref(null);
 
@@ -265,14 +268,15 @@ export default {
       }
     };
 
-    const BACKEND_BASE_URL = "https://shutterverse.onrender.com";
-    const getImageUrl = (image) => {
-      if (!image) return "";
-      if (image.startsWith("data:") || image.startsWith("http")) {
-        return image;
-      }
-      return `${BACKEND_BASE_URL}/${image}`;
-    };
+const getImageUrl = (image) => {
+  if (!image) return "";
+  // If it's already a full URL (from Cloudinary) or data URL, use it directly
+  if (image.startsWith("http") || image.startsWith("data:")) {
+    return image;
+  }
+  // Fallback for any remaining local paths (during migration)
+  return `https://shutterverse.onrender.com/${image}`;
+};
 
     const openCreateModal = () => {
       currentStudio.value = {
@@ -315,64 +319,76 @@ export default {
       }
     };
 
-    const submitForm = async () => {
+const submitForm = async () => {
+  try {
+    let newImagePath = currentStudio.value.image;
+    let newPublicId = currentStudio.value.publicId || null;
+
+    if (currentStudio.value.imageFile) {
+      const formData = new FormData();
+      formData.append("image", currentStudio.value.imageFile);
+
       try {
-        let newImagePath = currentStudio.value.image;
-
-        if (currentStudio.value.imageFile) {
-          const formData = new FormData();
-          formData.append("image", currentStudio.value.imageFile);
-
-          try {
-            const uploadResponse = await fetch(
-              "https://shutterverse.onrender.com/api/upload",
-              {
-                method: "POST",
-                body: formData,
-              }
-            );
-
-            if (!uploadResponse.ok) throw new Error("Upload failed");
-            const uploadData = await uploadResponse.json();
-            newImagePath = uploadData.imagePath;
-          } catch (uploadErr) {
-            console.error("Upload error:", uploadErr);
-            throw new Error("Failed to upload image");
+        const uploadResponse = await fetch(
+          "https://shutterverse.onrender.com/api/upload/studio",
+          {
+            method: "POST",
+            body: formData,
           }
-        }
+        );
 
-        const studioData = {
-          title: currentStudio.value.title,
-          image: newImagePath,
-          booking: currentStudio.value.booking,
-          details: {
-            name: currentStudio.value.details.name,
-            description: currentStudio.value.details.description,
-            features: currentStudio.value.details.features,
-          },
-        };
-
-        const url = isEditing.value
-          ? `https://shutterverse.onrender.com/api/studios/${currentStudio.value.id}`
-          : "https://shutterverse.onrender.com/api/studios";
-
-        const method = isEditing.value ? "PUT" : "POST";
-
-        const response = await fetch(url, {
-          method,
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(studioData),
-        });
-
-        if (!response.ok) throw new Error("Failed to save studio");
-
-        fetchStudios();
-        closeModal();
-      } catch (err) {
-        error.value = err.message;
-        console.error("Error saving studio:", err);
+        if (!uploadResponse.ok) throw new Error("Upload failed");
+        const uploadData = await uploadResponse.json();
+        newImagePath = uploadData.imagePath; // Cloudinary URL
+        newPublicId = uploadData.publicId; // Cloudinary public_id
+      } catch (uploadErr) {
+        console.error("Upload error:", uploadErr);
+        throw new Error("Failed to upload image");
       }
+    }
+
+    // Parse features string into array if it exists
+    let features = null;
+    if (currentStudio.value.details.features) {
+      features = currentStudio.value.details.features
+        .split(",")
+        .map(f => f.trim())
+        .filter(f => f.length > 0);
+    }
+
+    const studioData = {
+      title: currentStudio.value.title,
+      image: newImagePath,
+      booking: currentStudio.value.booking,
+      details: {
+        name: currentStudio.value.details.name,
+        description: currentStudio.value.details.description,
+        features: features, // Send as array or null
+      },
+      publicId: newPublicId, // Include publicId for backend
     };
+
+    const url = isEditing.value
+      ? `https://shutterverse.onrender.com/api/studios/${currentStudio.value.id}`
+      : "https://shutterverse.onrender.com/api/studios";
+
+    const method = isEditing.value ? "PUT" : "POST";
+
+    const response = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(studioData),
+    });
+
+    if (!response.ok) throw new Error("Failed to save studio");
+
+    fetchStudios();
+    closeModal();
+  } catch (err) {
+    error.value = err.message;
+    console.error("Error saving studio:", err);
+  }
+};
 
     const confirmDelete = (id) => {
       deleteId.value = id;
