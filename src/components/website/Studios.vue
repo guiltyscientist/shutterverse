@@ -9,7 +9,7 @@
           class="studio-item"
         >
           <img
-            :src="'https://shutterverse.onrender.com' + studio.image"
+            :src="'https://shutterverse.onrender.com/' + studio.image"
             :alt="studio.title"
             class="studio-image"
           />
@@ -30,7 +30,7 @@
       >
         <div class="studio-image-container">
           <img
-            :src="'https://shutterverse.onrender.com' + studio.image"
+            :src="'https://shutterverse.onrender.com/' + studio.image"
             :alt="studio.details.name"
             class="studio-image"
           />
