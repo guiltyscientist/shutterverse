@@ -26,10 +26,7 @@
           <div class="member-image-container">
             <div class="circle-image">
               <template v-if="member.imageUrl">
-                <img
-                  :src="member.imageUrl"
-                  :alt="member.name"
-                />
+                <img :src="member.imageUrl" :alt="member.name" />
               </template>
               <template v-else>
                 <div class="image-placeholder">
@@ -87,7 +84,9 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const response = await fetch("https://shutterverse.onrender.com/api/team-members");
+        const response = await fetch(
+          "https://shutterverse.onrender.com/api/team-members"
+        );
         if (!response.ok) throw new Error("Failed to fetch team members");
         const data = await response.json();
 
@@ -102,15 +101,11 @@ export default {
           if (member.SocialMedia) {
             for (const [platform, link] of Object.entries(member.SocialMedia)) {
               const iconMap = {
-                Instagram: "icons/social-medias/Instagram_icon.png",
-                Twitter: "icons/social-medias/Twitter_icon.png",
-                Facebook: "icons/social-medias/Facebook_icon.png",
-                LinkedIn: "icons/social-medias/LinkedIn_icon.png",
-                Vimeo: "icons/social-medias/Vimeo_icon.png",
-                YouTube: "icons/social-medias/YouTube_icon.png",
-                SoundCloud: "icons/social-medias/SoundCloud_icon.png",
-                Pinterest: "icons/social-medias/Pinterest_icon.png",
-                Behance: "icons/social-medias/Behance_icon.png",
+                Instagram: "https://cdn.simpleicons.org/instagram/74BCBF",
+                Twitter: "https://cdn.simpleicons.org/twitter/74BCBF",
+                Facebook: "https://cdn.simpleicons.org/facebook/74BCBF",
+                LinkedIn: "https://cdn.simpleicons.org/linkedin/74BCBF",
+                YouTube: "https://cdn.simpleicons.org/youtube/74BCBF",
               };
 
               if (iconMap[platform]) {
@@ -144,11 +139,11 @@ export default {
 
     getSocialIconUrl(iconPath) {
       // If it's already a full URL, use it directly
-      if (iconPath.startsWith('http') || iconPath.startsWith('data:')) {
+      if (iconPath.startsWith("http") || iconPath.startsWith("data:")) {
         return iconPath;
       }
       // Otherwise, assume it's a relative path from the public folder
-      return iconPath.startsWith('/') ? iconPath : `/${iconPath}`;
+      return iconPath.startsWith("/") ? iconPath : `/${iconPath}`;
     },
 
     getInitials(name) {
