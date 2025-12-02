@@ -46,8 +46,7 @@ const createCloudinaryStorage = (folderName) => {
         params: {
             folder: `shutterverse/${folderName}`,
             allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-            transformation: [{ width: 1200, height: 800, crop: 'limit' }],
-            resource_type: 'image'
+            transformation: []
         }
     });
 };
