@@ -135,7 +135,7 @@ export default {
   methods: {
     setupWebSocket() {
       const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-      const wsHost = window.location.hostname + ":3000";
+      const wsHost = window.location.hostname;
       this.ws = new WebSocket(`${protocol}://${wsHost}`);
 
       this.ws.onopen = () => {

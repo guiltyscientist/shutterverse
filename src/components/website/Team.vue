@@ -27,7 +27,7 @@
             <div class="circle-image">
               <template v-if="member.imageUrl">
                 <img
-                  :src="'https://shutterverse.onrender.com' + member.imageUrl"
+                  :src="'https://shutterverse.onrender.com/' + member.imageUrl"
                   :alt="member.name"
                 />
               </template>
